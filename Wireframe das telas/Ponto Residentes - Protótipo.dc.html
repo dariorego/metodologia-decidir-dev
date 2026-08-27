@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Instrument+Serif&display=swap" rel="stylesheet"><style>*{box-sizing:border-box}body{margin:0;background:#faf9f7;color:#1c1917;font-family:'Instrument Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}a{color:#0f766e;text-decoration:none}a:hover{color:#115e59}button{font-family:inherit;cursor:pointer}input,select,textarea{font-family:inherit}@keyframes toastIn{from{opacity:0;transform:translate(-50%,14px)}to{opacity:1;transform:translate(-50%,0)}}@keyframes sheetIn{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}@keyframes fadeIn{from{opacity:0}to{opacity:1}}</style></helmet>
+
+<div style="min-height:100vh">
+
+<sc-if value="{{ isLogin }}" hint-placeholder-val="{{ true }}">
+<div data-screen-label="Login" style="min-height:100vh;display:grid;grid-template-columns:1.05fr 1fr">
+<div style="display:flex;flex-direction:column;justify-content:space-between;padding:56px 60px;background:#0f766e;color:#f0fdfa">
+<div style="display:flex;align-items:center;gap:11px">
+<div style="width:30px;height:30px;border-radius:9px;background:#f0fdfa;display:flex;align-items:center;justify-content:center;color:#0f766e;font-weight:700;font-size:15px">P</div>
+<div style="font-weight:600;font-size:16px;letter-spacing:-.01em">Ponto Residentes</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:18px;max-width:420px">
+<div style="font-family:'Instrument Serif',serif;font-size:44px;line-height:1.08;letter-spacing:-.01em">Um registro por evento. Nada de planilha no fim do mês.</div>
+<div style="font-size:15px;line-height:1.55;color:#a7f3d6">Início de jornada, intervalo, retorno e saída — com setor, trilha de auditoria e justificativa quando a jornada anterior fica aberta.</div>
+</div>
+<div style="display:flex;gap:28px;font-size:12.5px;color:#8ee6ca">
+<div>LGPD · dados em trânsito e em repouso</div>
+<div>v0.4 · protótipo</div>
+</div>
+</div>
+<div style="display:flex;align-items:center;justify-content:center;padding:40px">
+<div style="width:100%;max-width:360px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="font-size:24px;font-weight:600;letter-spacing:-.02em">Entrar</div>
+<div style="font-size:14px;color:#78716c">Use suas credenciais da instituição.</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;flex-direction:column;gap:6px">
+<label style="font-size:12.5px;font-weight:500;color:#57534e">E-mail institucional</label>
+<input value="ana.ribeiro@hc.org.br" readonly="readonly" style="padding:11px 13px;border:1px solid #e7e5e4;border-radius:10px;background:#fff;font-size:14px;color:#1c1917;outline:none" />
+</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<label style="font-size:12.5px;font-weight:500;color:#57534e">Senha</label>
+<input type="password" value="••••••••••" readonly="readonly" style="padding:11px 13px;border:1px solid #e7e5e4;border-radius:10px;background:#fff;font-size:14px;outline:none" />
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:9px">
+<button onClick="{{ loginResident }}" style="padding:13px;border:none;border-radius:10px;background:#0f766e;color:#fff;font-size:14.5px;font-weight:600" style-hover="background:#115e59">Entrar como residente</button>
+<button onClick="{{ loginAdmin }}" style="padding:13px;border:1px solid #d6d3d1;border-radius:10px;background:#fff;color:#1c1917;font-size:14.5px;font-weight:500" style-hover="border-color:#0f766e;color:#0f766e">Entrar como administração</button>
+</div>
+<div style="font-size:12.5px;color:#a8a29e;text-align:center">Dois perfis de demonstração com dados fictícios.</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isPonto }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Registro de ponto" style="min-height:100vh;display:flex;flex-direction:column">
+<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 26px;background:#fff;border-bottom:1px solid #e7e5e4;position:sticky;top:0;z-index:5">
+<div style="display:flex;align-items:center;gap:10px">
+<div style="width:26px;height:26px;border-radius:8px;background:#0f766e;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px">P</div>
+<div style="font-weight:600;font-size:14.5px;letter-spacing:-.01em">Ponto Residentes</div>
+</div>
+<div style="display:flex;align-items:center;gap:8px">
+<button onClick="{{ goRegistros }}" style="padding:8px 13px;border:1px solid #e7e5e4;border-radius:9px;background:#fff;font-size:13px;color:#44403c;font-weight:500" style-hover="border-color:#0f766e;color:#0f766e">Meus registros</button>
+<button onClick="{{ logout }}" style="padding:8px 13px;border:1px solid transparent;border-radius:9px;background:transparent;font-size:13px;color:#78716c" style-hover="background:#f5f5f4">Sair</button>
+<div style="display:flex;align-items:center;gap:8px;padding-left:8px;border-left:1px solid #e7e5e4">
+<div style="width:29px;height:29px;border-radius:50%;background:#ccfbf1;color:#0f766e;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600">AR</div>
+<div style="font-size:13px;color:#44403c">Ana Ribeiro</div>
+</div>
+</div>
+</div>
+
+<div style="flex:1;display:flex;justify-content:center;padding:26px 24px 60px">
+<div style="width:100%;max-width:940px;display:grid;grid-template-columns:minmax(0,1fr) 316px;gap:20px;align-items:start">
+
+<div style="display:flex;flex-direction:column;gap:16px">
+
+<sc-if value="{{ pending }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:12px;padding:15px 16px;border:1px solid #fcd34d;border-radius:14px;background:#fffbeb">
+<div style="width:22px;height:22px;border-radius:50%;background:#b45309;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex:none">!</div>
+<div style="display:flex;flex-direction:column;gap:7px">
+<div style="font-size:14px;font-weight:600;color:#78350f">Jornada de 25/08 sem registro de saída</div>
+<div style="font-size:13px;line-height:1.5;color:#92400e">Você precisa justificar antes de iniciar uma nova jornada. A administração é notificada automaticamente.</div>
+<button onClick="{{ goJustificar }}" style="align-self:flex-start;margin-top:2px;padding:8px 13px;border:none;border-radius:9px;background:#b45309;color:#fff;font-size:13px;font-weight:600" style-hover="background:#92400e">Justificar agora</button>
+</div>
+</div>
+</sc-if>
+
+<div style="padding:26px;background:#fff;border:1px solid #e7e5e4;border-radius:16px;display:flex;flex-direction:column;align-items:center;gap:18px">
+<div style="display:flex;flex-direction:column;align-items:center;gap:3px">
+<div style="font-size:13px;color:#78716c">{{ todayLabel }}</div>
+<div style="font-size:46px;font-weight:600;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1">{{ clock }}</div>
+</div>
+
+<sc-if value="{{ sectorAsStep }}" hint-placeholder-val="{{ false }}">
+<button onClick="{{ openSheet }}" style="display:flex;align-items:center;gap:9px;padding:8px 14px;border:1px solid #99f6e4;border-radius:999px;background:#f0fdfa;font-size:13px;color:#0f766e;font-weight:500" style-hover="background:#ccfbf1">
+<span style="width:7px;height:7px;border-radius:50%;background:#0f766e"></span><span>{{ sectorLine }}</span><span style="color:#5eead4">alterar</span>
+</button>
+</sc-if>
+<sc-if value="{{ sectorInline }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;gap:9px">
+<label style="font-size:13px;color:#78716c">Setor</label>
+<select value="{{ sector }}" onChange="{{ setSectorFromSelect }}" style="padding:8px 12px;border:1px solid #d6d3d1;border-radius:9px;background:#fff;font-size:13.5px;color:#1c1917">
+<sc-for list="{{ sectors }}" as="s" hint-placeholder-count="4"><option value="{{ s.name }}">{{ s.name }}</option></sc-for>
+</select>
+</div>
+</sc-if>
+
+<sc-if value="{{ hasPrimary }}" hint-placeholder-val="{{ true }}">
+<button onClick="{{ punchPrimary }}" style="width:216px;height:216px;border-radius:50%;border:none;background:#0f766e;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;box-shadow:0 10px 30px rgba(15,118,110,.28)" style-hover="background:#115e59" style-active="transform:scale(.98)">
+<span style="font-size:23px;font-weight:600;letter-spacing:-.02em;line-height:1.2;max-width:150px">{{ primaryLabel }}</span>
+<span style="font-size:12.5px;color:#99f6e4;font-weight:400">{{ primaryHint }}</span>
+</button>
+</sc-if>
+<sc-if value="{{ dayClosed }}" hint-placeholder-val="{{ false }}">
+<div style="width:216px;height:216px;border-radius:50%;border:1px dashed #d6d3d1;background:#fafaf9;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px">
+<span style="font-size:20px;font-weight:600;color:#57534e">Jornada<br />encerrada</span>
+<span style="font-size:12.5px;color:#a8a29e">{{ totalLabel }} registradas</span>
+</div>
+</sc-if>
+
+<sc-if value="{{ hasSecondary }}" hint-placeholder-val="{{ false }}">
+<button onClick="{{ punchSecondary }}" style="padding:10px 18px;border:1px solid #d6d3d1;border-radius:10px;background:#fff;font-size:13.5px;font-weight:500;color:#44403c" style-hover="border-color:#0f766e;color:#0f766e">{{ secondaryLabel }}</button>
+</sc-if>
+
+<div style="font-size:12px;color:#a8a29e;text-align:center;max-width:340px;line-height:1.5">Registro confirmado em menos de 2s. Local e dispositivo ficam na trilha de auditoria.</div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:14px;padding:20px;background:#fff;border:1px solid #e7e5e4;border-radius:16px">
+<div style="display:flex;align-items:baseline;justify-content:space-between">
+<div style="font-size:14px;font-weight:600">Jornada de hoje</div>
+<div style="font-size:12.5px;color:#78716c;font-variant-numeric:tabular-nums">{{ totalLabel }}</div>
+</div>
+
+<sc-if value="{{ noEvents }}" hint-placeholder-val="{{ false }}">
+<div style="padding:22px 12px;border:1px dashed #e7e5e4;border-radius:11px;text-align:center;font-size:13px;color:#a8a29e;line-height:1.5">Nenhum evento hoje.<br />O primeiro registro abre a jornada.</div>
+</sc-if>
+
+<sc-for list="{{ events }}" as="ev" hint-placeholder-count="0">
+<div style="display:flex;gap:11px">
+<div style="display:flex;flex-direction:column;align-items:center;flex:none;padding-top:3px">
+<div style="width:9px;height:9px;border-radius:50%;background:#0f766e"></div>
+<div style="width:1px;flex:1;min-height:26px;background:#e7e5e4"></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:2px;padding-bottom:12px">
+<div style="font-size:13.5px;font-weight:500">{{ ev.label }}</div>
+<div style="font-size:12px;color:#a8a29e">{{ ev.meta }}</div>
+</div>
+</div>
+</sc-for>
+
+<sc-if value="{{ hasPrimary }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;gap:11px;opacity:.65">
+<div style="width:9px;height:9px;border-radius:50%;border:1px dashed #a8a29e;flex:none;margin-top:3px"></div>
+<div style="display:flex;flex-direction:column;gap:2px">
+<div style="font-size:13.5px;color:#78716c">{{ primaryLabel }}</div>
+<div style="font-size:12px;color:#c4c0bb">aguardando registro</div>
+</div>
+</div>
+</sc-if>
+
+<div style="margin-top:4px;padding-top:14px;border-top:1px solid #f5f5f4;display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;justify-content:space-between;font-size:12.5px;color:#78716c"><span>Intervalos</span><span>{{ breaksLabel }}</span></div>
+<div style="display:flex;justify-content:space-between;font-size:12.5px;color:#78716c"><span>Setor atual</span><span>{{ sector }}</span></div>
+<div style="display:flex;justify-content:space-between;font-size:12.5px;color:#78716c"><span>Origem</span><span>Automático · web</span></div>
+</div>
+<button onClick="{{ goRegistros }}" style="padding:9px;border:1px solid #e7e5e4;border-radius:9px;background:#fff;font-size:13px;color:#44403c;font-weight:500" style-hover="border-color:#0f766e;color:#0f766e">Ver histórico completo</button>
+</div>
+</div>
+</div>
+
+<sc-if value="{{ sheet }}" hint-placeholder-val="{{ false }}">
+<div style="position:fixed;inset:0;background:rgba(28,25,23,.42);display:flex;align-items:flex-end;justify-content:center;z-index:20;animation:fadeIn .16s ease">
+<div style="width:100%;max-width:520px;background:#fff;border-radius:20px 20px 0 0;padding:22px 22px 26px;display:flex;flex-direction:column;gap:16px;animation:sheetIn .2s cubic-bezier(.2,.8,.3,1)">
+<div style="display:flex;align-items:flex-start;justify-content:space-between">
+<div style="display:flex;flex-direction:column;gap:4px">
+<div style="font-size:19px;font-weight:600;letter-spacing:-.02em">Onde você está?</div>
+<div style="font-size:13px;color:#78716c">O setor fica gravado junto ao evento de ponto.</div>
+</div>
+<button onClick="{{ closeSheet }}" style="width:30px;height:30px;border:1px solid #e7e5e4;border-radius:9px;background:#fff;color:#78716c;font-size:15px;line-height:1" style-hover="background:#f5f5f4">×</button>
+</div>
+<sc-if value="{{ geo }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;align-items:center;gap:9px;padding:11px 13px;border:1px solid #99f6e4;border-radius:11px;background:#f0fdfa">
+<div style="width:8px;height:8px;border-radius:50%;background:#0f766e"></div>
+<div style="font-size:13px;color:#0f766e">Localização detectada — sugestão ordenada por distância.</div>
+</div>
+</sc-if>
+<div style="display:flex;flex-direction:column;gap:7px;max-height:260px;overflow:auto">
+<sc-for list="{{ sectors }}" as="s" hint-placeholder-count="5">
+<button onClick="{{ s.pick }}" style="{{ s.style }}">
+<span style="{{ s.dotStyle }}"></span>
+<span style="font-size:14px;font-weight:500">{{ s.name }}</span>
+<span style="margin-left:auto;font-size:12px;color:#a8a29e">{{ s.dist }}</span>
+</button>
+</sc-for>
+</div>
+<button onClick="{{ closeSheet }}" style="padding:13px;border:none;border-radius:11px;background:#0f766e;color:#fff;font-size:14.5px;font-weight:600" style-hover="background:#115e59">Confirmar setor</button>
+</div>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isJustificar }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Justificativa obrigatória" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 24px;background:#fffdf7">
+<div style="width:100%;max-width:600px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;align-items:center;gap:10px">
+<div style="width:24px;height:24px;border-radius:7px;background:#b45309;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700">!</div>
+<div style="font-size:13px;font-weight:600;color:#92400e;letter-spacing:.04em;text-transform:uppercase">Justificativa obrigatória</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="font-size:27px;font-weight:600;letter-spacing:-.025em;line-height:1.2">Sua jornada de 25/08 não foi encerrada</div>
+<div style="font-size:14.5px;line-height:1.55;color:#57534e">Para iniciar uma nova jornada, informe o que aconteceu. A administração recebe a justificativa para revisão e o registro fica na trilha de auditoria.</div>
+</div>
+
+<div style="padding:16px;background:#fff;border:1px solid #e7e5e4;border-radius:14px;display:flex;flex-direction:column;gap:11px">
+<div style="font-size:12.5px;font-weight:600;color:#78716c;letter-spacing:.03em;text-transform:uppercase">Registro em aberto</div>
+<div style="display:flex;flex-direction:column;gap:7px">
+<div style="display:flex;justify-content:space-between;font-size:13.5px"><span style="color:#78716c">Início de jornada</span><span style="font-weight:500">25/08/2026 · 19:12</span></div>
+<div style="display:flex;justify-content:space-between;font-size:13.5px"><span style="color:#78716c">Setor</span><span style="font-weight:500">Pronto-Socorro</span></div>
+<div style="display:flex;justify-content:space-between;font-size:13.5px"><span style="color:#78716c">Fim de jornada</span><span style="font-weight:600;color:#b45309">não registrado</span></div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:14px;padding:18px;background:#fff;border:1px solid #e7e5e4;border-radius:14px">
+<div style="display:flex;flex-direction:column;gap:7px">
+<label style="font-size:13px;font-weight:600">Motivo</label>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<sc-for list="{{ reasons }}" as="r" hint-placeholder-count="4">
+<button onClick="{{ r.pick }}" style="{{ r.style }}">{{ r.label }}</button>
+</sc-for>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:7px">
+<div style="display:flex;justify-content:space-between;align-items:baseline">
+<label style="font-size:13px;font-weight:600">Horário real de saída</label>
+<span style="font-size:12px;color:#a8a29e">25/08</span>
+</div>
+<input value="{{ exitTime }}" onChange="{{ setExitTime }}" placeholder="ex.: 07:20" style="padding:11px 13px;border:1px solid #e7e5e4;border-radius:10px;font-size:14px;outline:none" />
+</div>
+<div style="display:flex;flex-direction:column;gap:7px">
+<div style="display:flex;justify-content:space-between;align-items:baseline">
+<label style="font-size:13px;font-weight:600">Descrição</label>
+<span style="font-size:12px;color:#a8a29e">{{ charLabel }}</span>
+</div>
+<textarea onChange="{{ setJustText }}" value="{{ justText }}" placeholder="Descreva o que impediu o registro de saída." style="min-height:92px;padding:11px 13px;border:1px solid #e7e5e4;border-radius:10px;font-size:14px;line-height:1.5;outline:none;resize:vertical"></textarea>
+</div>
+</div>
+
+<div style="display:flex;align-items:center;gap:10px">
+<button onClick="{{ backToPonto }}" style="padding:13px 18px;border:1px solid #d6d3d1;border-radius:11px;background:#fff;font-size:14px;color:#57534e;font-weight:500" style-hover="background:#f5f5f4">Voltar</button>
+<button onClick="{{ submitJust }}" style="{{ submitStyle }}">Enviar e iniciar jornada</button>
+</div>
+<div style="font-size:12px;color:#a8a29e;line-height:1.5">{{ submitHint }}</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isRegistros }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Meus registros" style="min-height:100vh;display:flex;flex-direction:column">
+<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 26px;background:#fff;border-bottom:1px solid #e7e5e4">
+<div style="display:flex;align-items:center;gap:14px">
+<button onClick="{{ backToPonto }}" style="padding:8px 12px;border:1px solid #e7e5e4;border-radius:9px;background:#fff;font-size:13px;color:#44403c" style-hover="border-color:#0f766e;color:#0f766e">← Ponto</button>
+<div style="font-weight:600;font-size:14.5px">Meus registros</div>
+</div>
+<div style="display:flex;align-items:center;gap:8px">
+<div style="width:29px;height:29px;border-radius:50%;background:#ccfbf1;color:#0f766e;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600">AR</div>
+<div style="font-size:13px;color:#44403c">Ana Ribeiro</div>
+</div>
+</div>
+
+<div style="flex:1;display:flex;justify-content:center;padding:26px 24px 60px">
+<div style="width:100%;max-width:820px;display:flex;flex-direction:column;gap:18px">
+
+<div style="display:flex;gap:12px;flex-wrap:wrap">
+<div style="flex:1;min-width:150px;padding:15px 16px;background:#fff;border:1px solid #e7e5e4;border-radius:13px;display:flex;flex-direction:column;gap:4px">
+<div style="font-size:12px;color:#78716c">Horas no mês</div>
+<div style="font-size:24px;font-weight:600;letter-spacing:-.02em">168h 40m</div>
+</div>
+<div style="flex:1;min-width:150px;padding:15px 16px;background:#fff;border:1px solid #e7e5e4;border-radius:13px;display:flex;flex-direction:column;gap:4px">
+<div style="font-size:12px;color:#78716c">Plantões</div>
+<div style="font-size:24px;font-weight:600;letter-spacing:-.02em">18</div>
+</div>
+<div style="flex:1;min-width:150px;padding:15px 16px;background:#fff;border:1px solid #e7e5e4;border-radius:13px;display:flex;flex-direction:column;gap:4px">
+<div style="font-size:12px;color:#78716c">Ajustes manuais</div>
+<div style="font-size:24px;font-weight:600;letter-spacing:-.02em">2</div>
+</div>
+<div style="{{ pendingCardStyle }}">
+<div style="{{ pendingLabelStyle }}">Pendências</div>
+<div style="{{ pendingValueStyle }}">{{ pendingCount }}</div>
+</div>
+</div>
+
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+<div style="display:flex;gap:7px">
+<sc-for list="{{ histFilters }}" as="f" hint-placeholder-count="3"><button onClick="{{ f.pick }}" style="{{ f.style }}">{{ f.label }}</button></sc-for>
+</div>
+<button onClick="{{ exportCsv }}" style="padding:9px 14px;border:1px solid #e7e5e4;border-radius:9px;background:#fff;font-size:13px;color:#44403c;font-weight:500" style-hover="border-color:#0f766e;color:#0f766e">Exportar CSV</button>
+</div>
+
+<div style="background:#fff;border:1px solid #e7e5e4;border-radius:14px;overflow:hidden">
+<div style="display:grid;grid-template-columns:110px 1fr 92px 128px;gap:12px;padding:12px 18px;background:#fafaf9;border-bottom:1px solid #e7e5e4;font-size:11.5px;font-weight:600;color:#78716c;letter-spacing:.04em;text-transform:uppercase">
+<div>Data</div><div>Eventos</div><div>Total</div><div>Status</div>
+</div>
+<sc-for list="{{ history }}" as="d" hint-placeholder-count="6">
+<div style="display:grid;grid-template-columns:110px 1fr 92px 128px;gap:12px;padding:14px 18px;border-bottom:1px solid #f5f5f4;align-items:center">
+<div style="display:flex;flex-direction:column"><span style="font-size:13.5px;font-weight:500">{{ d.date }}</span><span style="font-size:11.5px;color:#a8a29e">{{ d.weekday }}</span></div>
+<div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:13px;color:#44403c;font-variant-numeric:tabular-nums">{{ d.times }}</span><span style="font-size:11.5px;color:#a8a29e">{{ d.sector }}</span></div>
+<div style="font-size:13.5px;font-variant-numeric:tabular-nums">{{ d.total }}</div>
+<div><span style="{{ d.badgeStyle }}">{{ d.status }}</span></div>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isAdmin }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:100vh;display:grid;grid-template-columns:236px 1fr">
+<div style="background:#fff;border-right:1px solid #e7e5e4;padding:18px 14px;display:flex;flex-direction:column;gap:22px;position:sticky;top:0;height:100vh">
+<div style="display:flex;align-items:center;gap:10px;padding:0 6px">
+<div style="width:26px;height:26px;border-radius:8px;background:#0f766e;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px">P</div>
+<div style="display:flex;flex-direction:column"><span style="font-weight:600;font-size:13.5px">Ponto Residentes</span><span style="font-size:11px;color:#a8a29e">Administração</span></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:3px">
+<sc-for list="{{ nav }}" as="n" hint-placeholder-count="5">
+<button onClick="{{ n.pick }}" style="{{ n.style }}">
+<span>{{ n.label }}</span>
+<sc-if value="{{ n.badge }}" hint-placeholder-val="{{ false }}"><span style="margin-left:auto;min-width:19px;height:19px;padding:0 5px;border-radius:999px;background:#b45309;color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center">{{ n.badge }}</span></sc-if>
+</button>
+</sc-for>
+</div>
+<div style="margin-top:auto;display:flex;flex-direction:column;gap:10px">
+<div style="padding:12px;border:1px solid #e7e5e4;border-radius:11px;display:flex;flex-direction:column;gap:5px">
+<div style="font-size:12px;font-weight:600;color:#44403c">Notificações</div>
+<div style="font-size:11.5px;line-height:1.45;color:#78716c">{{ notifLine }}</div>
+</div>
+<div style="display:flex;align-items:center;gap:9px;padding:8px 6px">
+<div style="width:28px;height:28px;border-radius:50%;background:#e7e5e4;color:#57534e;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:600">CM</div>
+<div style="display:flex;flex-direction:column"><span style="font-size:12.5px;font-weight:500">Carla Mendes</span><span style="font-size:11px;color:#a8a29e">Coordenação</span></div>
+<button onClick="{{ logout }}" style="margin-left:auto;padding:5px 9px;border:1px solid #e7e5e4;border-radius:8px;background:#fff;font-size:11.5px;color:#78716c" style-hover="background:#f5f5f4">Sair</button>
+</div>
+</div>
+</div>
+
+<div style="padding:24px 30px 60px;display:flex;flex-direction:column;gap:20px;min-width:0">
+
+<sc-if value="{{ isAgora }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Admin — quem está na instituição" style="display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap">
+<div style="display:flex;flex-direction:column;gap:5px">
+<div style="font-size:23px;font-weight:600;letter-spacing:-.025em">Quem está na instituição</div>
+<div style="font-size:13.5px;color:#78716c">Atualizado às {{ clock }} · consolidação near real-time</div>
+</div>
+<div style="display:flex;gap:8px">
+<button onClick="{{ goAjuste }}" style="padding:10px 14px;border:1px solid #e7e5e4;border-radius:10px;background:#fff;font-size:13px;font-weight:500;color:#44403c" style-hover="border-color:#0f766e;color:#0f766e">Inserir ponto manual</button>
+<button onClick="{{ exportCsv }}" style="padding:10px 14px;border:none;border-radius:10px;background:#0f766e;color:#fff;font-size:13px;font-weight:600" style-hover="background:#115e59">Exportar</button>
+</div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+<div style="padding:16px;background:#fff;border:1px solid #e7e5e4;border-radius:13px;display:flex;flex-direction:column;gap:5px"><div style="font-size:12px;color:#78716c">Na instituição</div><div style="font-size:26px;font-weight:600;letter-spacing:-.02em">{{ presentCount }}</div><div style="font-size:11.5px;color:#a8a29e">de 34 residentes ativos</div></div>
+<div style="padding:16px;background:#fff;border:1px solid #e7e5e4;border-radius:13px;display:flex;flex-direction:column;gap:5px"><div style="font-size:12px;color:#78716c">Em intervalo</div><div style="font-size:26px;font-weight:600;letter-spacing:-.02em">3</div><div style="font-size:11.5px;color:#a8a29e">média 38 min</div></div>
+<div style="padding:16px;background:#fffbeb;border:1px solid #fcd34d;border-radius:13px;display:flex;flex-direction:column;gap:5px"><div style="font-size:12px;color:#92400e">Pontos não finalizados</div><div style="font-size:26px;font-weight:600;letter-spacing:-.02em;color:#78350f">{{ openCount }}</div><div style="font-size:11.5px;color:#a16207">aguardando justificativa</div></div>
+<div style="padding:16px;background:#fff;border:1px solid #e7e5e4;border-radius:13px;display:flex;flex-direction:column;gap:5px"><div style="font-size:12px;color:#78716c">Ajustes a aprovar</div><div style="font-size:26px;font-weight:600;letter-spacing:-.02em">{{ approvalCount }}</div><div style="font-size:11.5px;color:#a8a29e">SLA 24h</div></div>
+</div>
+
+<div style="display:flex;gap:9px;flex-wrap:wrap;align-items:center">
+<sc-for list="{{ sectorFilters }}" as="f" hint-placeholder-count="4"><button onClick="{{ f.pick }}" style="{{ f.style }}">{{ f.label }}</button></sc-for>
+<div style="margin-left:auto;display:flex;align-items:center;gap:8px">
+<input placeholder="Buscar residente" style="padding:9px 12px;border:1px solid #e7e5e4;border-radius:9px;background:#fff;font-size:13px;width:190px;outline:none" />
+<select style="padding:9px 12px;border:1px solid #e7e5e4;border-radius:9px;background:#fff;font-size:13px"><option>Hoje</option><option>Últimos 7 dias</option><option>Mês atual</option></select>
+</div>
+</div>
+
+<div style="background:#fff;border:1px solid #e7e5e4;border-radius:14px;overflow:hidden">
+<div style="display:grid;grid-template-columns:1.5fr 1fr 100px 110px 140px;gap:12px;padding:12px 18px;background:#fafaf9;border-bottom:1px solid #e7e5e4;font-size:11.5px;font-weight:600;color:#78716c;letter-spacing:.04em;text-transform:uppercase">
+<div>Residente</div><div>Setor</div><div>Desde</div><div>Nesta jornada</div><div>Status</div>
+</div>
+<sc-for list="{{ present }}" as="p" hint-placeholder-count="6">
+<div style="display:grid;grid-template-columns:1.5fr 1fr 100px 110px 140px;gap:12px;padding:13px 18px;border-bottom:1px solid #f5f5f4;align-items:center">
+<div style="display:flex;align-items:center;gap:10px">
+<div style="{{ p.avatarStyle }}">{{ p.initials }}</div>
+<div style="display:flex;flex-direction:column"><span style="font-size:13.5px;font-weight:500">{{ p.name }}</span><span style="font-size:11.5px;color:#a8a29e">{{ p.program }}</span></div>
+</div>
+<div style="font-size:13px;color:#44403c">{{ p.sector }}</div>
+<div style="font-size:13px;font-variant-numeric:tabular-nums;color:#44403c">{{ p.since }}</div>
+<div style="font-size:13px;font-variant-numeric:tabular-nums;color:#44403c">{{ p.elapsed }}</div>
+<div><span style="{{ p.badgeStyle }}">{{ p.status }}</span></div>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isAprov }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Admin — fila de aprovações" style="display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:5px">
+<div style="font-size:23px;font-weight:600;letter-spacing:-.025em">Justificativas e ajustes</div>
+<div style="font-size:13.5px;color:#78716c">{{ approvalCount }} itens aguardando decisão · SLA de 24h</div>
+</div>
+<sc-if value="{{ noApprovals }}" hint-placeholder-val="{{ false }}">
+<div style="padding:40px;background:#fff;border:1px dashed #e7e5e4;border-radius:14px;text-align:center;font-size:14px;color:#a8a29e">Fila vazia. Nada aguardando decisão.</div>
+</sc-if>
+<sc-for list="{{ approvals }}" as="a" hint-placeholder-count="3">
+<div style="padding:18px;background:#fff;border:1px solid #e7e5e4;border-radius:14px;display:grid;grid-template-columns:1fr 208px;gap:20px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:11px;min-width:0">
+<div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap">
+<span style="{{ a.kindStyle }}">{{ a.kind }}</span>
+<span style="font-size:14.5px;font-weight:600">{{ a.name }}</span>
+<span style="font-size:12.5px;color:#a8a29e">{{ a.submitted }}</span>
+</div>
+<div style="display:flex;gap:22px;flex-wrap:wrap">
+<div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:11.5px;color:#a8a29e">Data do evento</span><span style="font-size:13px;font-weight:500">{{ a.date }}</span></div>
+<div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:11.5px;color:#a8a29e">Registrado</span><span style="font-size:13px;font-weight:500">{{ a.was }}</span></div>
+<div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:11.5px;color:#a8a29e">Solicitado</span><span style="font-size:13px;font-weight:600;color:#0f766e">{{ a.wants }}</span></div>
+<div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:11.5px;color:#a8a29e">Motivo</span><span style="font-size:13px;font-weight:500">{{ a.reason }}</span></div>
+</div>
+<div style="padding:11px 13px;background:#fafaf9;border-radius:10px;font-size:13px;line-height:1.5;color:#44403c">{{ a.text }}</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<button onClick="{{ a.approve }}" style="padding:11px;border:none;border-radius:10px;background:#0f766e;color:#fff;font-size:13.5px;font-weight:600" style-hover="background:#115e59">Aprovar</button>
+<button onClick="{{ a.reject }}" style="padding:11px;border:1px solid #d6d3d1;border-radius:10px;background:#fff;color:#57534e;font-size:13.5px;font-weight:500" style-hover="border-color:#b45309;color:#b45309">Reprovar</button>
+<div style="font-size:11.5px;line-height:1.45;color:#a8a29e">Decisão registrada na trilha de auditoria com seu usuário e horário.</div>
+</div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ isAjuste }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Admin — ajuste manual de ponto" style="display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:5px">
+<div style="font-size:23px;font-weight:600;letter-spacing:-.025em">Inserir ou corrigir ponto</div>
+<div style="font-size:13.5px;color:#78716c">Toda alteração manual exige motivo e gera registro de auditoria.</div>
+</div>
+<div style="display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:20px;align-items:start">
+<div style="min-width:0;padding:20px;background:#fff;border:1px solid #e7e5e4;border-radius:14px;display:flex;flex-direction:column;gap:16px">
+<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px">
+<div style="display:flex;flex-direction:column;gap:6px"><label style="font-size:12.5px;font-weight:600;color:#44403c">Residente</label><select style="padding:10px 12px;border:1px solid #e7e5e4;border-radius:10px;background:#fff;font-size:13.5px"><option>Ana Ribeiro · R2 Clínica Médica</option><option>Bruno Sato · R1 Cirurgia</option><option>Helena Costa · R3 Pediatria</option></select></div>
+<div style="display:flex;flex-direction:column;gap:6px"><label style="font-size:12.5px;font-weight:600;color:#44403c">Data</label><input value="26/08/2026" style="padding:10px 12px;border:1px solid #e7e5e4;border-radius:10px;font-size:13.5px;outline:none" /></div>
+<div style="display:flex;flex-direction:column;gap:6px"><label style="font-size:12.5px;font-weight:600;color:#44403c">Tipo de evento</label><select style="padding:10px 12px;border:1px solid #e7e5e4;border-radius:10px;background:#fff;font-size:13.5px"><option>Fim de jornada</option><option>Início de jornada</option><option>Início de intervalo</option><option>Fim de intervalo</option></select></div>
+<div style="display:flex;flex-direction:column;gap:6px"><label style="font-size:12.5px;font-weight:600;color:#44403c">Hora</label><input value="19:40" style="padding:10px 12px;border:1px solid #e7e5e4;border-radius:10px;font-size:13.5px;outline:none" /></div>
+<div style="display:flex;flex-direction:column;gap:6px"><label style="font-size:12.5px;font-weight:600;color:#44403c">Setor</label><select style="padding:10px 12px;border:1px solid #e7e5e4;border-radius:10px;background:#fff;font-size:13.5px"><option>Pronto-Socorro</option><option>UTI Adulto</option><option>Ambulatório 3</option></select></div>
+<div style="display:flex;flex-direction:column;gap:6px"><label style="font-size:12.5px;font-weight:600;color:#44403c">Motivo do ajuste</label><select style="padding:10px 12px;border:1px solid #e7e5e4;border-radius:10px;background:#fff;font-size:13.5px"><option>Esquecimento do residente</option><option>Falha do dispositivo</option><option>Sem conexão no setor</option><option>Correção de setor</option></select></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px"><label style="font-size:12.5px;font-weight:600;color:#44403c">Observação</label><textarea placeholder="Contexto que justifica a alteração." style="min-height:80px;padding:11px 13px;border:1px solid #e7e5e4;border-radius:10px;font-size:13.5px;line-height:1.5;outline:none;resize:vertical"></textarea></div>
+<div style="display:flex;flex-direction:column;gap:9px;padding:13px;background:#fafaf9;border-radius:11px">
+<label style="display:flex;align-items:center;gap:9px;font-size:13px;color:#44403c"><input type="checkbox" checked="checked" style="width:15px;height:15px;accent-color:#0f766e" />Notificar o residente por e-mail</label>
+<label style="display:flex;align-items:center;gap:9px;font-size:13px;color:#44403c"><input type="checkbox" checked="checked" style="width:15px;height:15px;accent-color:#0f766e" />Enviar para aprovação da coordenação</label>
+</div>
+<div style="display:flex;gap:9px">
+<button onClick="{{ saveAdjust }}" style="padding:12px 18px;border:none;border-radius:10px;background:#0f766e;color:#fff;font-size:14px;font-weight:600" style-hover="background:#115e59">Salvar ajuste</button>
+<button onClick="{{ goAgora }}" style="padding:12px 18px;border:1px solid #d6d3d1;border-radius:10px;background:#fff;font-size:14px;color:#57534e;font-weight:500" style-hover="background:#f5f5f4">Cancelar</button>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="padding:16px;background:#fff;border:1px solid #e7e5e4;border-radius:14px;display:flex;flex-direction:column;gap:12px">
+<div style="font-size:12.5px;font-weight:600;color:#78716c;letter-spacing:.04em;text-transform:uppercase">Jornada de 26/08</div>
+<sc-for list="{{ auditDay }}" as="e" hint-placeholder-count="3">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span style="font-size:13px;color:#44403c">{{ e.label }}</span><span style="{{ e.style }}">{{ e.time }}</span></div>
+</sc-for>
+</div>
+<div style="padding:16px;background:#fff;border:1px solid #e7e5e4;border-radius:14px;display:flex;flex-direction:column;gap:11px">
+<div style="font-size:12.5px;font-weight:600;color:#78716c;letter-spacing:.04em;text-transform:uppercase">Trilha de auditoria</div>
+<sc-for list="{{ audit }}" as="l" hint-placeholder-count="3">
+<div style="display:flex;flex-direction:column;gap:2px;padding-bottom:9px;border-bottom:1px solid #f5f5f4"><span style="font-size:12.5px;color:#1c1917">{{ l.what }}</span><span style="font-size:11.5px;color:#a8a29e">{{ l.who }}</span></div>
+</sc-for>
+</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isResidentes }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Admin — cadastro de residentes" style="display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap">
+<div style="display:flex;flex-direction:column;gap:5px">
+<div style="font-size:23px;font-weight:600;letter-spacing:-.025em">Residentes</div>
+<div style="font-size:13.5px;color:#78716c">34 ativos · 6 inativos · datas de entrada e saída na instituição</div>
+</div>
+<button onClick="{{ newResident }}" style="padding:10px 15px;border:none;border-radius:10px;background:#0f766e;color:#fff;font-size:13px;font-weight:600" style-hover="background:#115e59">Novo residente</button>
+</div>
+<div style="display:flex;gap:9px;align-items:center;flex-wrap:wrap">
+<sc-for list="{{ residentFilters }}" as="f" hint-placeholder-count="3"><button onClick="{{ f.pick }}" style="{{ f.style }}">{{ f.label }}</button></sc-for>
+<input placeholder="Buscar por nome ou matrícula" style="margin-left:auto;padding:9px 12px;border:1px solid #e7e5e4;border-radius:9px;background:#fff;font-size:13px;width:230px;outline:none" />
+</div>
+<div style="background:#fff;border:1px solid #e7e5e4;border-radius:14px;overflow:hidden">
+<div style="display:grid;grid-template-columns:1.6fr 1fr 110px 110px 100px 84px;gap:12px;padding:12px 18px;background:#fafaf9;border-bottom:1px solid #e7e5e4;font-size:11.5px;font-weight:600;color:#78716c;letter-spacing:.04em;text-transform:uppercase">
+<div>Residente</div><div>Programa</div><div>Entrada</div><div>Saída</div><div>Status</div><div></div>
+</div>
+<sc-for list="{{ residents }}" as="r" hint-placeholder-count="6">
+<div style="display:grid;grid-template-columns:1.6fr 1fr 110px 110px 100px 84px;gap:12px;padding:13px 18px;border-bottom:1px solid #f5f5f4;align-items:center">
+<div style="display:flex;align-items:center;gap:10px">
+<div style="{{ r.avatarStyle }}">{{ r.initials }}</div>
+<div style="display:flex;flex-direction:column"><span style="font-size:13.5px;font-weight:500">{{ r.name }}</span><span style="font-size:11.5px;color:#a8a29e">{{ r.id }}</span></div>
+</div>
+<div style="font-size:13px;color:#44403c">{{ r.program }}</div>
+<div style="font-size:13px;font-variant-numeric:tabular-nums;color:#44403c">{{ r.start }}</div>
+<div style="font-size:13px;font-variant-numeric:tabular-nums;color:#78716c">{{ r.end }}</div>
+<div><span style="{{ r.badgeStyle }}">{{ r.status }}</span></div>
+<button onClick="{{ r.edit }}" style="justify-self:start;padding:6px 11px;border:1px solid #e7e5e4;border-radius:8px;background:#fff;font-size:12px;color:#57534e" style-hover="border-color:#0f766e;color:#0f766e">Editar</button>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isRelatorios }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Admin — relatórios" style="display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap">
+<div style="display:flex;flex-direction:column;gap:5px">
+<div style="font-size:23px;font-weight:600;letter-spacing:-.025em">Relatórios</div>
+<div style="font-size:13.5px;color:#78716c">Consolidação diária · período de 01/08 a 27/08/2026</div>
+</div>
+<div style="display:flex;gap:8px">
+<select style="padding:10px 12px;border:1px solid #e7e5e4;border-radius:10px;background:#fff;font-size:13px"><option>Mês atual</option><option>Mês anterior</option><option>Últimos 90 dias</option></select>
+<button onClick="{{ exportCsv }}" style="padding:10px 14px;border:1px solid #e7e5e4;border-radius:10px;background:#fff;font-size:13px;font-weight:500;color:#44403c" style-hover="border-color:#0f766e;color:#0f766e">CSV</button>
+<button onClick="{{ exportPdf }}" style="padding:10px 14px;border:none;border-radius:10px;background:#0f766e;color:#fff;font-size:13px;font-weight:600" style-hover="background:#115e59">PDF</button>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+<div style="padding:16px;background:#fff;border:1px solid #e7e5e4;border-radius:13px;display:flex;flex-direction:column;gap:5px"><div style="font-size:12px;color:#78716c">Horas consolidadas</div><div style="font-size:26px;font-weight:600;letter-spacing:-.02em">5.212h</div><div style="font-size:11.5px;color:#a8a29e">34 residentes</div></div>
+<div style="padding:16px;background:#fff;border:1px solid #e7e5e4;border-radius:13px;display:flex;flex-direction:column;gap:5px"><div style="font-size:12px;color:#78716c">Presença média</div><div style="font-size:26px;font-weight:600;letter-spacing:-.02em">94,2%</div><div style="font-size:11.5px;color:#a8a29e">meta 92%</div></div>
+<div style="padding:16px;background:#fff;border:1px solid #e7e5e4;border-radius:13px;display:flex;flex-direction:column;gap:5px"><div style="font-size:12px;color:#78716c">Atrasos</div><div style="font-size:26px;font-weight:600;letter-spacing:-.02em">41</div><div style="font-size:11.5px;color:#a8a29e">tolerância 10 min</div></div>
+<div style="padding:16px;background:#fff;border:1px solid #e7e5e4;border-radius:13px;display:flex;flex-direction:column;gap:5px"><div style="font-size:12px;color:#78716c">Ajustes manuais</div><div style="font-size:26px;font-weight:600;letter-spacing:-.02em">28</div><div style="font-size:11.5px;color:#a8a29e">0,5% dos registros</div></div>
+</div>
+<div style="display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px;align-items:start">
+<div style="min-width:0;padding:20px;background:#fff;border:1px solid #e7e5e4;border-radius:14px;display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;align-items:baseline;justify-content:space-between"><div style="font-size:14.5px;font-weight:600">Horas por dia</div><div style="font-size:12px;color:#a8a29e">últimos 14 dias</div></div>
+<div style="display:flex;align-items:flex-end;gap:8px;height:170px">
+<sc-for list="{{ bars }}" as="b" hint-placeholder-count="14">
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;height:100%;justify-content:flex-end">
+<div style="{{ b.style }}"></div>
+<div style="font-size:10.5px;color:#a8a29e">{{ b.day }}</div>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="padding:18px;background:#fff;border:1px solid #e7e5e4;border-radius:14px;display:flex;flex-direction:column;gap:13px">
+<div style="font-size:12.5px;font-weight:600;color:#78716c;letter-spacing:.04em;text-transform:uppercase">Por setor</div>
+<sc-for list="{{ sectorStats }}" as="s" hint-placeholder-count="4">
+<div style="display:flex;flex-direction:column;gap:5px">
+<div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:#44403c">{{ s.name }}</span><span style="font-weight:500">{{ s.hours }}</span></div>
+<div style="height:6px;border-radius:999px;background:#f5f5f4;overflow:hidden"><div style="{{ s.barStyle }}"></div></div>
+</div>
+</sc-for>
+</div>
+<div style="padding:18px;background:#fff;border:1px solid #e7e5e4;border-radius:14px;display:flex;flex-direction:column;gap:11px">
+<div style="font-size:12.5px;font-weight:600;color:#78716c;letter-spacing:.04em;text-transform:uppercase">Relatórios salvos</div>
+<sc-for list="{{ savedReports }}" as="r" hint-placeholder-count="3">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding-bottom:9px;border-bottom:1px solid #f5f5f4">
+<div style="display:flex;flex-direction:column"><span style="font-size:13px;font-weight:500">{{ r.name }}</span><span style="font-size:11.5px;color:#a8a29e">{{ r.freq }}</span></div>
+<button onClick="{{ exportCsv }}" style="padding:6px 10px;border:1px solid #e7e5e4;border-radius:8px;background:#fff;font-size:12px;color:#57534e" style-hover="border-color:#0f766e;color:#0f766e">Baixar</button>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+<div style="position:fixed;bottom:26px;left:50%;transform:translateX(-50%);z-index:40;animation:toastIn .22s cubic-bezier(.2,.8,.3,1)">
+<div style="display:flex;align-items:center;gap:10px;padding:12px 18px;background:#1c1917;color:#fafaf9;border-radius:999px;box-shadow:0 10px 30px rgba(28,25,23,.25);font-size:13.5px">
+<span style="width:17px;height:17px;border-radius:50%;background:#5eead4;color:#134e4a;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">✓</span>
+<span>{{ toast }}</span>
+</div>
+</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;sectorPicker&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Etapa dedicada&quot;,&quot;Dropdown inline&quot;],&quot;default&quot;:&quot;Etapa dedicada&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Registro de ponto&quot;},&quot;geoDetect&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Registro de ponto&quot;}}">
+const SECTORS = [
+  { name: 'UTI Adulto', dist: '~12 m' },
+  { name: 'Pronto-Socorro', dist: '~80 m' },
+  { name: 'Ambulatório 3', dist: '~140 m' },
+  { name: 'Centro Cirúrgico', dist: '~210 m' },
+  { name: 'Enfermaria B', dist: '~260 m' },
+  { name: 'Maternidade', dist: '~340 m' }
+];
+const LABEL = { start: 'Início de jornada', break_start: 'Início de intervalo', break_end: 'Fim de intervalo', end: 'Fim de jornada' };
+const SHORT = { start: 'Iniciar jornada', break_start: 'Iniciar intervalo', break_end: 'Voltar do intervalo', end: 'Encerrar jornada' };
+const REASONS = ['Esquecimento', 'Emergência no setor', 'Falha do dispositivo', 'Sem conexão', 'Outro'];
+const PILL = 'padding:8px 13px;border-radius:999px;font-size:12.5px;font-weight:500;cursor:pointer;';
+const PILL_ON = PILL + 'border:1px solid #0f766e;background:#0f766e;color:#fff;';
+const PILL_OFF = PILL + 'border:1px solid #e7e5e4;background:#fff;color:#57534e;';
+const BADGE = 'display:inline-block;padding:4px 10px;border-radius:999px;font-size:11.5px;font-weight:600;';
+const B_OK = BADGE + 'background:#f0fdfa;color:#0f766e;border:1px solid #99f6e4;';
+const B_WARN = BADGE + 'background:#fffbeb;color:#92400e;border:1px solid #fcd34d;';
+const B_MUTED = BADGE + 'background:#fafaf9;color:#78716c;border:1px solid #e7e5e4;';
+const AV = 'width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:600;flex:none;';
+
+function pad(n) { return n < 10 ? '0' + n : '' + n; }
+function hhmm(d) { return pad(d.getHours()) + ':' + pad(d.getMinutes()); }
+function toMin(t) { const p = t.split(':'); return (+p[0]) * 60 + (+p[1]); }
+function fmtMin(m) { if (m <= 0) return '0h 00m'; return Math.floor(m / 60) + 'h ' + pad(m % 60) + 'm'; }
+
+class Component extends DCLogic {
+  state = {
+    route: 'login',
+    now: new Date(),
+    sheet: false,
+    sector: 'UTI Adulto',
+    events: [],
+    pending: true,
+    toast: null,
+    reason: null,
+    justText: '',
+    exitTime: '',
+    histFilter: 'Agosto',
+    sectorFilter: 'Todos os setores',
+    residentFilter: 'Ativos',
+    approvals: [
+      { id: 'a1', kind: 'Justificativa', name: 'Bruno Sato', program: 'R1 Cirurgia', submitted: 'há 2h', date: '24/08/2026', was: 'sem saída', wants: 'saída 19:05', reason: 'Emergência no setor', text: 'Fui chamado para uma cirurgia de emergência e saí sem registrar o fim da jornada.' },
+      { id: 'a2', kind: 'Ajuste manual', name: 'Helena Costa', program: 'R3 Pediatria', submitted: 'há 5h', date: '23/08/2026', was: 'intervalo 12:10–13:40', wants: 'intervalo 12:10–12:55', reason: 'Correção de intervalo', text: 'Retornei do intervalo às 12:55, o registro de retorno não foi aceito pelo dispositivo do setor.' },
+      { id: 'a3', kind: 'Justificativa', name: 'Diego Alves', program: 'R2 Ortopedia', submitted: 'ontem', date: '22/08/2026', was: 'sem saída', wants: 'saída 07:20', reason: 'Esquecimento', text: 'Plantão noturno encerrado às 07:20, esqueci de registrar a saída antes de sair do hospital.' }
+    ]
+  };
+
+  componentDidMount() { this._t = setInterval(() => this.setState({ now: new Date() }), 1000); }
+  componentWillUnmount() { clearInterval(this._t); if (this._tt) clearTimeout(this._tt); }
+
+  flash(msg) {
+    this.setState({ toast: msg });
+    if (this._tt) clearTimeout(this._tt);
+    this._tt = setTimeout(() => this.setState({ toast: null }), 2600);
+  }
+  go(route) { this.setState({ route: route, sheet: false }); }
+
+  nextKind() {
+    const ev = this.state.events;
+    if (!ev.length) return 'start';
+    const last = ev[ev.length - 1].kind;
+    if (last === 'start') return 'break_start';
+    if (last === 'break_start') return 'break_end';
+    if (last === 'break_end') return 'end';
+    return null;
+  }
+  secondKind() {
+    const ev = this.state.events;
+    if (!ev.length) return null;
+    const last = ev[ev.length - 1].kind;
+    if (last === 'start') return 'end';
+    if (last === 'break_end') return 'break_start';
+    return null;
+  }
+  punch(kind) {
+    if (kind === 'start' && this.state.pending) { this.go('justificar'); return; }
+    const t = hhmm(this.state.now);
+    this.setState(s => ({ events: s.events.concat([{ kind: kind, time: t, sector: s.sector }]) }));
+    this.flash(LABEL[kind] + ' registrado às ' + t);
+  }
+  worked() {
+    const ev = this.state.events;
+    if (!ev.length) return 0;
+    const nowM = toMin(hhmm(this.state.now));
+    let total = 0, open = null;
+    ev.forEach(e => {
+      if (e.kind === 'start' || e.kind === 'break_end') open = toMin(e.time);
+      if ((e.kind === 'break_start' || e.kind === 'end') && open !== null) { total += toMin(e.time) - open; open = null; }
+    });
+    if (open !== null) total += nowM - open;
+    return total;
+  }
+
+  renderVals() {
+    const s = this.state;
+    const r = s.route;
+    const admin = r.indexOf('admin-') === 0;
+    const nk = this.nextKind();
+    const sk = this.secondKind();
+    const pickerStep = (this.props.sectorPicker ?? 'Etapa dedicada') === 'Etapa dedicada';
+    const breaks = s.events.filter(e => e.kind === 'break_start').length;
+
+    const sectors = SECTORS.map(x => ({
+      name: x.name, dist: x.dist,
+      style: 'display:flex;align-items:center;gap:11px;width:100%;padding:12px 13px;border-radius:11px;text-align:left;cursor:pointer;background:' + (x.name === s.sector ? '#f0fdfa' : '#fff') + ';border:' + (x.name === s.sector ? '2px solid #0f766e' : '1px solid #e7e5e4') + ';color:#1c1917;',
+      dotStyle: 'width:11px;height:11px;border-radius:50%;flex:none;background:' + (x.name === s.sector ? '#0f766e' : 'transparent') + ';border:' + (x.name === s.sector ? 'none' : '1.5px solid #d6d3d1'),
+      pick: () => this.setState({ sector: x.name })
+    }));
+
+    const justOk = !!s.reason && s.justText.trim().length >= 20;
+    const pill = (label, active, onPick) => ({ label: label, style: active ? PILL_ON : PILL_OFF, pick: onPick });
+
+    const present = [
+      { name: 'Bruno Sato', program: 'R1 Cirurgia', sector: 'Centro Cirúrgico', since: '06:48', elapsed: '7h 44m', status: 'Na instituição', tone: 'ok' },
+      { name: 'Helena Costa', program: 'R3 Pediatria', sector: 'Enfermaria B', since: '07:02', elapsed: '7h 30m', status: 'Em intervalo', tone: 'muted' },
+      { name: 'Diego Alves', program: 'R2 Ortopedia', sector: 'Pronto-Socorro', since: '19:10', elapsed: '19h 22m', status: 'Jornada longa', tone: 'warn' },
+      { name: 'Marina Lopes', program: 'R1 Clínica Médica', sector: 'UTI Adulto', since: '08:15', elapsed: '6h 17m', status: 'Na instituição', tone: 'ok' },
+      { name: 'Rafael Nunes', program: 'R2 Anestesiologia', sector: 'Centro Cirúrgico', since: '06:30', elapsed: '8h 02m', status: 'Na instituição', tone: 'ok' },
+      { name: 'Tainá Ferreira', program: 'R3 Neurologia', sector: 'Ambulatório 3', since: '09:00', elapsed: '5h 32m', status: 'Em intervalo', tone: 'muted' }
+    ];
+    if (s.events.length && this.nextKind() !== null) {
+      present.unshift({ name: 'Ana Ribeiro', program: 'R2 Clínica Médica', sector: s.sector, since: s.events[0].time, elapsed: fmtMin(this.worked()), status: s.events[s.events.length - 1].kind === 'break_start' ? 'Em intervalo' : 'Na instituição', tone: s.events[s.events.length - 1].kind === 'break_start' ? 'muted' : 'ok' });
+    }
+    const tone = t => t === 'ok' ? B_OK : t === 'warn' ? B_WARN : B_MUTED;
+    const avTone = t => AV + (t === 'warn' ? 'background:#fef3c7;color:#92400e' : t === 'muted' ? 'background:#f5f5f4;color:#78716c' : 'background:#ccfbf1;color:#0f766e');
+    const initials = n => n.split(' ').map(w => w[0]).slice(0, 2).join('');
+    const filtered = s.sectorFilter === 'Todos os setores' ? present : present.filter(p => p.sector === s.sectorFilter);
+
+    const history = [
+      { date: '27/08', weekday: 'quinta', times: s.events.length ? s.events.map(e => e.time).join(' · ') : 'em andamento', total: fmtMin(this.worked()), sector: s.sector, status: 'Em curso', tone: 'muted' },
+      { date: '26/08', weekday: 'quarta', times: '07:02 · 12:14 · 12:51 · 19:40', total: '12h 01m', sector: 'UTI Adulto', status: 'Consolidado', tone: 'ok' },
+      { date: '25/08', weekday: 'terça', times: '19:12 · —', total: '—', sector: 'Pronto-Socorro', status: s.pending ? 'Sem saída' : 'Justificado', tone: s.pending ? 'warn' : 'muted' },
+      { date: '23/08', weekday: 'domingo', times: '07:00 · 11:58 · 12:40 · 19:05', total: '11h 23m', sector: 'Pronto-Socorro', status: 'Consolidado', tone: 'ok' },
+      { date: '22/08', weekday: 'sábado', times: '06:52 · 12:30 · 13:05 · 19:12', total: '11h 45m', sector: 'Enfermaria B', status: 'Ajuste manual', tone: 'muted' },
+      { date: '21/08', weekday: 'sexta', times: '07:11 · 12:20 · 12:58 · 18:44', total: '10h 55m', sector: 'UTI Adulto', status: 'Consolidado', tone: 'ok' },
+      { date: '20/08', weekday: 'quinta', times: '07:04 · 12:02 · 12:44 · 19:20', total: '11h 34m', sector: 'UTI Adulto', status: 'Consolidado', tone: 'ok' }
+    ];
+
+    const residents = [
+      { name: 'Ana Ribeiro', id: 'MR-2043', program: 'R2 Clínica Médica', start: '01/03/2025', end: '—', status: 'Ativo', tone: 'ok' },
+      { name: 'Bruno Sato', id: 'MR-2118', program: 'R1 Cirurgia', start: '01/03/2026', end: '—', status: 'Ativo', tone: 'ok' },
+      { name: 'Helena Costa', id: 'MR-1877', program: 'R3 Pediatria', start: '01/03/2024', end: '28/02/2027', status: 'Ativo', tone: 'ok' },
+      { name: 'Diego Alves', id: 'MR-2051', program: 'R2 Ortopedia', start: '01/03/2025', end: '—', status: 'Ativo', tone: 'ok' },
+      { name: 'Marina Lopes', id: 'MR-2126', program: 'R1 Clínica Médica', start: '01/03/2026', end: '—', status: 'Ativo', tone: 'ok' },
+      { name: 'Paulo Vieira', id: 'MR-1690', program: 'R3 Cardiologia', start: '01/03/2023', end: '29/02/2026', status: 'Inativo', tone: 'muted' },
+      { name: 'Sofia Braga', id: 'MR-1702', program: 'R3 Radiologia', start: '01/03/2023', end: '29/02/2026', status: 'Inativo', tone: 'muted' }
+    ];
+    const resFiltered = s.residentFilter === 'Todos' ? residents : residents.filter(x => (s.residentFilter === 'Ativos') === (x.status === 'Ativo'));
+
+    const barVals = [10.5, 11.2, 9.8, 12.1, 11.6, 8.4, 7.9, 11.9, 12.4, 10.2, 11.1, 9.5, 12.0, 11.4];
+    const days = ['14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27'];
+    const bars = barVals.map((v, i) => ({
+      day: days[i],
+      style: 'width:100%;border-radius:5px 5px 2px 2px;height:' + Math.round((v / 13) * 100) + '%;background:' + (i === barVals.length - 1 ? '#0f766e' : '#99f6e4') + ';'
+    }));
+
+    const sectorStats = [
+      { name: 'Pronto-Socorro', hours: '1.482h', pct: 100 },
+      { name: 'UTI Adulto', hours: '1.190h', pct: 80 },
+      { name: 'Centro Cirúrgico', hours: '918h', pct: 62 },
+      { name: 'Enfermaria B', hours: '744h', pct: 50 },
+      { name: 'Ambulatório 3', hours: '512h', pct: 34 }
+    ].map(x => ({ name: x.name, hours: x.hours, barStyle: 'height:100%;border-radius:999px;background:#0f766e;width:' + x.pct + '%;' }));
+
+    return {
+      isLogin: r === 'login', isPonto: r === 'ponto', isJustificar: r === 'justificar', isRegistros: r === 'registros',
+      isAdmin: admin, isAgora: r === 'admin-agora', isAprov: r === 'admin-aprov', isAjuste: r === 'admin-ajuste',
+      isResidentes: r === 'admin-residentes', isRelatorios: r === 'admin-relatorios',
+      loginResident: () => this.go('ponto'), loginAdmin: () => this.go('admin-agora'), logout: () => this.go('login'),
+      goRegistros: () => this.go('registros'), goJustificar: () => this.go('justificar'), backToPonto: () => this.go('ponto'),
+      goAgora: () => this.go('admin-agora'), goAjuste: () => this.go('admin-ajuste'),
+      clock: hhmm(s.now) + ':' + pad(s.now.getSeconds()),
+      todayLabel: 'quinta, 27 de agosto de 2026',
+      sector: s.sector, sectors: sectors, sectorLine: 'Setor: ' + s.sector,
+      sectorAsStep: pickerStep, sectorInline: !pickerStep,
+      setSectorFromSelect: e => this.setState({ sector: e.target.value }),
+      sheet: s.sheet, openSheet: () => this.setState({ sheet: true }), closeSheet: () => this.setState({ sheet: false }),
+      geo: this.props.geoDetect ?? true,
+      pending: s.pending, pendingCount: s.pending ? 1 : 0,
+      pendingCardStyle: 'flex:1;min-width:150px;padding:15px 16px;border-radius:13px;display:flex;flex-direction:column;gap:4px;' + (s.pending ? 'background:#fffbeb;border:1px solid #fcd34d;' : 'background:#fff;border:1px solid #e7e5e4;'),
+      pendingLabelStyle: 'font-size:12px;color:' + (s.pending ? '#92400e' : '#78716c'),
+      pendingValueStyle: 'font-size:24px;font-weight:600;letter-spacing:-.02em;color:' + (s.pending ? '#78350f' : '#1c1917'),
+      hasPrimary: nk !== null, dayClosed: nk === null,
+      primaryLabel: nk ? SHORT[nk] : '', primaryHint: nk === 'start' ? 'abre a jornada de hoje' : 'toque para registrar',
+      hasSecondary: !!sk, secondaryLabel: sk ? SHORT[sk] : '',
+      punchPrimary: () => this.punch(nk), punchSecondary: () => this.punch(sk),
+      noEvents: s.events.length === 0,
+      events: s.events.map(e => ({ label: LABEL[e.kind], meta: e.time + ' · ' + e.sector + ' · automático' })),
+      totalLabel: fmtMin(this.worked()),
+      breaksLabel: breaks === 0 ? 'nenhum' : breaks + (breaks === 1 ? ' intervalo' : ' intervalos'),
+      reasons: REASONS.map(x => pill(x, s.reason === x, () => this.setState({ reason: x }))),
+      justText: s.justText, setJustText: e => this.setState({ justText: e.target.value }),
+      exitTime: s.exitTime, setExitTime: e => this.setState({ exitTime: e.target.value }),
+      charLabel: s.justText.trim().length >= 20 ? 'mínimo atingido' : 'mínimo de 20 caracteres · faltam ' + (20 - s.justText.trim().length),
+      submitStyle: 'flex:1;padding:13px 18px;border:none;border-radius:11px;font-size:14px;font-weight:600;color:#fff;background:' + (justOk ? '#0f766e' : '#d6d3d1') + ';cursor:' + (justOk ? 'pointer' : 'not-allowed') + ';',
+      submitHint: justOk ? 'A administração será notificada e a jornada de hoje será aberta em seguida.' : 'Selecione um motivo e escreva ao menos 20 caracteres para continuar.',
+      submitJust: () => {
+        if (!justOk) { this.flash('Preencha motivo e descrição'); return; }
+        const t = hhmm(s.now);
+        this.setState(st => ({
+          pending: false, route: 'ponto', events: [{ kind: 'start', time: t, sector: st.sector }],
+          approvals: [{ id: 'new', kind: 'Justificativa', name: 'Ana Ribeiro', program: 'R2 Clínica Médica', submitted: 'agora', date: '25/08/2026', was: 'sem saída', wants: st.exitTime ? 'saída ' + st.exitTime : 'saída a definir', reason: st.reason, text: st.justText }].concat(st.approvals)
+        }));
+        this.flash('Justificativa enviada · jornada iniciada às ' + t);
+      },
+      histFilters: ['Agosto', 'Julho', 'Todos'].map(x => pill(x, s.histFilter === x, () => this.setState({ histFilter: x }))),
+      history: history.map(d => ({ date: d.date, weekday: d.weekday, times: d.times, total: d.total, sector: d.sector, status: d.status, badgeStyle: tone(d.tone) })),
+      sectorFilters: ['Todos os setores', 'UTI Adulto', 'Pronto-Socorro', 'Centro Cirúrgico', 'Enfermaria B'].map(x => pill(x, s.sectorFilter === x, () => this.setState({ sectorFilter: x }))),
+      present: filtered.map(p => ({ name: p.name, program: p.program, sector: p.sector, since: p.since, elapsed: p.elapsed, status: p.status, badgeStyle: tone(p.tone), avatarStyle: avTone(p.tone), initials: initials(p.name) })),
+      presentCount: present.length, openCount: s.pending ? 4 : 3, approvalCount: s.approvals.length,
+      notifLine: s.approvals.length + ' pendências · canal: e-mail + painel',
+      nav: [
+        { key: 'admin-agora', label: 'Agora', badge: 0 },
+        { key: 'admin-aprov', label: 'Aprovações', badge: s.approvals.length },
+        { key: 'admin-ajuste', label: 'Ajuste manual', badge: 0 },
+        { key: 'admin-residentes', label: 'Residentes', badge: 0 },
+        { key: 'admin-relatorios', label: 'Relatórios', badge: 0 }
+      ].map(n => ({
+        label: n.label, badge: n.badge,
+        style: 'display:flex;align-items:center;gap:8px;width:100%;padding:10px 12px;border:none;border-radius:9px;text-align:left;font-size:13.5px;font-weight:500;cursor:pointer;background:' + (r === n.key ? '#f0fdfa' : 'transparent') + ';color:' + (r === n.key ? '#0f766e' : '#57534e') + ';',
+        pick: () => this.go(n.key)
+      })),
+      approvals: s.approvals.map(a => ({
+        kind: a.kind, name: a.name, submitted: a.submitted, date: a.date, was: a.was, wants: a.wants, reason: a.reason, text: a.text,
+        kindStyle: a.kind === 'Justificativa' ? B_WARN : B_OK,
+        approve: () => { this.setState(st => ({ approvals: st.approvals.filter(x => x.id !== a.id) })); this.flash('Ajuste de ' + a.name + ' aprovado'); },
+        reject: () => { this.setState(st => ({ approvals: st.approvals.filter(x => x.id !== a.id) })); this.flash('Ajuste de ' + a.name + ' reprovado'); }
+      })),
+      noApprovals: s.approvals.length === 0,
+      auditDay: [
+        { label: 'Início de jornada', time: '07:02', ok: true },
+        { label: 'Início de intervalo', time: '12:14', ok: true },
+        { label: 'Fim de intervalo', time: '12:51', ok: true },
+        { label: 'Fim de jornada', time: 'não registrado', ok: false }
+      ].map(e => ({ label: e.label, time: e.time, style: 'font-size:12.5px;font-weight:600;font-variant-numeric:tabular-nums;color:' + (e.ok ? '#1c1917' : '#b45309') })),
+      audit: [
+        { what: 'Ponto criado manualmente · 22/08 19:12', who: 'Carla Mendes · aprovado por Coordenação' },
+        { what: 'Setor corrigido: Enfermaria B → UTI Adulto', who: 'Carla Mendes · 21/08 09:41' },
+        { what: 'Justificativa aprovada · 20/08', who: 'Rita Duarte · 20/08 21:03' }
+      ],
+      residentFilters: ['Ativos', 'Inativos', 'Todos'].map(x => pill(x, s.residentFilter === x, () => this.setState({ residentFilter: x }))),
+      residents: resFiltered.map(x => ({ name: x.name, id: x.id, program: x.program, start: x.start, end: x.end, status: x.status, badgeStyle: tone(x.tone), avatarStyle: avTone(x.tone), initials: initials(x.name), edit: () => this.flash('Abrindo cadastro de ' + x.name) })),
+      newResident: () => this.flash('Novo cadastro de residente'),
+      saveAdjust: () => { this.go('admin-aprov'); this.flash('Ajuste salvo e enviado para aprovação'); },
+      exportCsv: () => this.flash('Exportação CSV gerada'),
+      exportPdf: () => this.flash('Exportação PDF gerada'),
+      bars: bars, sectorStats: sectorStats,
+      savedReports: [
+        { name: 'Presença diária por setor', freq: 'diário · 07:00' },
+        { name: 'Horas consolidadas por residente', freq: 'mensal · dia 1' },
+        { name: 'Ajustes manuais e auditoria', freq: 'semanal · segunda' }
+      ],
+      toast: s.toast
+    };
+  }
+}
+</script>
+</body>
+</html>

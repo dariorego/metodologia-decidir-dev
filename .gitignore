@@ -1,0 +1,9 @@
+.DS_Store
+node_modules/
+apps/web/.next/
+apps/web/.env*.local
+apps/web/tsconfig.tsbuildinfo
+.env
+*.local
+# contém a chave service_role — nunca versionar
+.supabase.md

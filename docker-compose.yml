@@ -1,0 +1,30 @@
+# Publicação com Docker + Traefik (stack da imersão).
+# Pré-requisitos no servidor: rede externa "traefik" e Traefik com o
+# entrypoint "websecure" e o certresolver "letsencrypt" configurados.
+#
+#   PONTO_DOMAIN=ponto.exemplo.org.br docker compose up -d --build
+
+services:
+  ponto-web:
+    build:
+      context: ./apps/web
+      args:
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+    image: ponto-residentes-web:latest
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+    networks:
+      - traefik
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.ponto.rule=Host(`${PONTO_DOMAIN}`)
+      - traefik.http.routers.ponto.entrypoints=websecure
+      - traefik.http.routers.ponto.tls.certresolver=letsencrypt
+      - traefik.http.services.ponto.loadbalancer.server.port=3000
+
+networks:
+  traefik:
+    external: true
