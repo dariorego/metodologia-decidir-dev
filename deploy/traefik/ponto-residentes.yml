@@ -1,0 +1,29 @@
+# Rota do Traefik para o Ponto Residentes.
+#
+# IMPORTANTE: o Traefik deste servidor NAO usa o provider docker — a secao
+# `providers` do /etc/traefik/traefik.yml tem apenas `file`. Os labels
+# traefik.* nos containers sao decorativos e nao criam rota nenhuma; quem
+# publica um dominio e um arquivo como este.
+#
+# Instalar copiando para o diretorio observado pelo Traefik (watch: true,
+# recarrega sozinho, sem reiniciar o Traefik):
+#
+#   scp deploy/traefik/ponto-residentes.yml \
+#       root@147.93.15.198:/opt/pilates/traefik/dynamic/
+#
+# O container precisa estar na rede traefik-public para ser alcancado pelo
+# nome — o docker-compose.yml na raiz ja cuida disso.
+http:
+  routers:
+    ponto-residentes:
+      rule: "Host(`formacao.plataformaativa.cloud`)"
+      entryPoints:
+        - websecure
+      service: ponto-residentes
+      tls:
+        certResolver: letsencrypt
+  services:
+    ponto-residentes:
+      loadBalancer:
+        servers:
+          - url: "http://ponto-residentes-ponto-web-1:3000"

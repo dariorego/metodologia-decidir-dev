@@ -70,6 +70,14 @@ for i in $(seq 1 30); do
 done
 
 docker compose -p "$PROJECT" ps
+
+# Lembrete: a rota vive num arquivo do Traefik, nao nos labels.
+if ! ssh_marker=1 test -f /opt/pilates/traefik/dynamic/ponto-residentes.yml 2>/dev/null; then
+  echo
+  echo "AVISO: /opt/pilates/traefik/dynamic/ponto-residentes.yml nao encontrado."
+  echo "       Sem ele o dominio responde 404: este Traefik usa provider de"
+  echo "       arquivo e ignora os labels do Docker. Copie de deploy/traefik/."
+fi
 echo
 echo "==> Commit implantado: $SHORT ($NEW_COMMIT)"
 echo "==> Reverter:          ./deploy/rollback.sh"
