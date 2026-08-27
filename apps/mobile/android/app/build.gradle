@@ -39,9 +39,14 @@ android {
             if (hasKeystore) {
                 signingConfig signingConfigs.release
             }
-            minifyEnabled true
-            shrinkResources true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            // minify DESLIGADO de proposito: o Capacitor resolve plugins por
+            // reflexao/anotacoes e expoe a ponte por @JavascriptInterface. Com o
+            // R8 ligado sem regras keep, essas classes somem e o app fecha ao
+            // acionar qualquer plugin (ex.: GPS ao registrar a batida).
+            // Esta e a configuracao padrao e testada do Capacitor.
+            minifyEnabled false
+            shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 }
