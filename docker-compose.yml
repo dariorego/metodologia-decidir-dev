@@ -1,6 +1,10 @@
-# Publicação com Docker + Traefik (stack da imersão).
-# Pré-requisitos no servidor: rede externa "traefik" e Traefik com o
-# entrypoint "websecure" e o certresolver "letsencrypt" configurados.
+# Publicação com Docker + Traefik.
+#
+# A rede, o entrypoint e o certresolver seguem a convenção já usada pelos
+# demais serviços do servidor (n8n, ticketz, jurema): rede externa
+# "traefik-public", entrypoint "websecure", certresolver "letsencrypt".
+# O label traefik.docker.network é necessário porque o Traefik está em mais
+# de uma rede e precisa saber por qual alcançar este container.
 #
 #   PONTO_DOMAIN=ponto.exemplo.org.br docker compose up -d --build
 
@@ -17,14 +21,15 @@ services:
       NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
     networks:
-      - traefik
+      - traefik-public
     labels:
       - traefik.enable=true
+      - traefik.docker.network=traefik-public
       - traefik.http.routers.ponto.rule=Host(`${PONTO_DOMAIN}`)
       - traefik.http.routers.ponto.entrypoints=websecure
       - traefik.http.routers.ponto.tls.certresolver=letsencrypt
       - traefik.http.services.ponto.loadbalancer.server.port=3000
 
 networks:
-  traefik:
+  traefik-public:
     external: true

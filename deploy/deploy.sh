@@ -32,9 +32,9 @@ SHORT="${NEW_COMMIT:0:7}"
 echo "==> Commit implantado: $SHORT"
 
 # --- 3. Confere pre-requisitos sem alterar nada de terceiros ----------------
-if ! docker network inspect traefik >/dev/null 2>&1; then
-  echo "ERRO: a rede externa 'traefik' nao existe. Deploy abortado para nao" >&2
-  echo "      alterar a infraestrutura existente. Verifique o Traefik." >&2
+if ! docker network inspect traefik-public >/dev/null 2>&1; then
+  echo "ERRO: a rede externa 'traefik-public' nao existe. Deploy abortado para" >&2
+  echo "      nao alterar a infraestrutura existente. Verifique o Traefik." >&2
   exit 1
 fi
 
