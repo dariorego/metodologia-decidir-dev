@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/components/punchmap.tsx","./src/components/icons.tsx","./src/components/ui.tsx","./src/lib/domain.ts","./src/lib/geo.ts","./src/lib/queue.ts","./src/lib/supabase.ts","./src/screens/historico.tsx","./src/screens/login.tsx","./src/screens/mapa.tsx","./src/screens/ponto.tsx"],"version":"5.9.3"}

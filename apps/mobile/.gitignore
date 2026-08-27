@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.env
+.env.local
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+android/app/release/
+android/capacitor-cordova-android-plugins/
+# Keystore de assinatura: NUNCA versionar (repositorio publico).
+# Quem tem o arquivo assina atualizacoes como se fosse o app oficial.
+*.keystore
+*.jks

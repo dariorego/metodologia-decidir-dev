@@ -7,3 +7,16 @@ apps/web/tsconfig.tsbuildinfo
 *.local
 # contém a chave service_role — nunca versionar
 .supabase.md
+
+# App mobile
+apps/mobile/node_modules/
+apps/mobile/dist/
+apps/mobile/android/app/build/
+apps/mobile/android/build/
+apps/mobile/android/.gradle/
+apps/mobile/android/local.properties
+apps/mobile/android/keystore.properties
+apps/mobile/android/app/*.keystore
+apps/mobile/.env
+# APK entregue (binário; distribuído fora do Git)
+dist/
