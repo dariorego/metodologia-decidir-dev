@@ -84,7 +84,7 @@ export default function AprovacoesPage() {
         <h1 className="text-[23px] font-semibold tracking-tight">
           Justificativas e ajustes
         </h1>
-        <p className="text-[13.5px] text-stone-500">
+        <p className="text-[13.5px] text-ink-muted">
           {items.length}{" "}
           {items.length === 1 ? "item aguardando" : "itens aguardando"} decisão ·
           SLA de 48h
@@ -92,7 +92,7 @@ export default function AprovacoesPage() {
       </div>
 
       {loaded && items.length === 0 && (
-        <div className="rounded-[14px] border border-dashed border-stone-200 bg-white p-10 text-center text-sm text-stone-400">
+        <div className="rounded-[14px] border border-dashed border-line bg-surface p-10 text-center text-sm text-ink-faint">
           Fila vazia. Nada aguardando decisão.
         </div>
       )}
@@ -103,7 +103,7 @@ export default function AprovacoesPage() {
         return (
           <div
             key={j.id}
-            className="grid items-start gap-5 rounded-[14px] border border-stone-200 bg-white p-4.5 lg:grid-cols-[1fr_208px]"
+            className="grid items-start gap-5 rounded-[14px] border border-line bg-surface p-4.5 lg:grid-cols-[1fr_208px]"
           >
             <div className="flex min-w-0 flex-col gap-3">
               <div className="flex flex-wrap items-center gap-2">
@@ -111,7 +111,7 @@ export default function AprovacoesPage() {
                   {JUSTIFICATION_TYPE_LABEL[j.type]}
                 </Badge>
                 <span className="text-[14.5px] font-semibold">{name}</span>
-                <span className="text-[12.5px] text-stone-400">
+                <span className="text-[12.5px] text-ink-faint">
                   {j.ponto_residents?.program ?? ""} · enviado{" "}
                   {relative(j.created_at)}
                 </span>
@@ -119,7 +119,7 @@ export default function AprovacoesPage() {
 
               <div className="flex flex-wrap gap-6">
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-[11.5px] text-stone-400">
+                  <span className="text-[11.5px] text-ink-faint">
                     Data do evento
                   </span>
                   <span className="text-[13px] font-medium">
@@ -127,25 +127,25 @@ export default function AprovacoesPage() {
                   </span>
                 </div>
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-[11.5px] text-stone-400">Registrado</span>
+                  <span className="text-[11.5px] text-ink-faint">Registrado</span>
                   <span className="text-[13px] font-medium">
                     {j.type === "missed_clock_out" ? "sem saída" : "—"}
                   </span>
                 </div>
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-[11.5px] text-stone-400">Solicitado</span>
-                  <span className="text-[13px] font-semibold text-teal-700">
+                  <span className="text-[11.5px] text-ink-faint">Solicitado</span>
+                  <span className="text-[13px] font-semibold text-brand-700">
                     {j.requested_time ? `saída ${j.requested_time}` : "a definir"}
                   </span>
                 </div>
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-[11.5px] text-stone-400">Motivo</span>
+                  <span className="text-[11.5px] text-ink-faint">Motivo</span>
                   <span className="text-[13px] font-medium">{motivo}</span>
                 </div>
               </div>
 
               {texto && (
-                <div className="rounded-[10px] bg-stone-50 px-3 py-2.5 text-[13px] leading-relaxed text-stone-700">
+                <div className="rounded-[10px] bg-surface-raised px-3 py-2.5 text-[13px] leading-relaxed text-ink-soft">
                   {texto}
                 </div>
               )}
@@ -156,24 +156,24 @@ export default function AprovacoesPage() {
                   setNotes((n) => ({ ...n, [j.id]: e.target.value }))
                 }
                 placeholder="Nota de revisão (opcional)"
-                className="rounded-[9px] border border-stone-200 px-3 py-2 text-[13px] outline-none focus:border-teal-700"
+                className="rounded-[9px] border border-line px-3 py-2 text-[13px] outline-none focus:border-brand-700"
               />
             </div>
 
             <div className="flex flex-col gap-2">
               <button
                 onClick={() => review(j, "approved")}
-                className="cursor-pointer rounded-[10px] bg-teal-700 py-2.5 text-[13.5px] font-semibold text-white transition-colors hover:bg-teal-800"
+                className="cursor-pointer rounded-[10px] bg-brand-700 py-2.5 text-[13.5px] font-semibold text-white transition-colors hover:bg-brand-800"
               >
                 Aprovar
               </button>
               <button
                 onClick={() => review(j, "rejected")}
-                className="cursor-pointer rounded-[10px] border border-stone-300 bg-white py-2.5 text-[13.5px] font-medium text-stone-600 transition-colors hover:border-amber-700 hover:text-amber-700"
+                className="cursor-pointer rounded-[10px] border border-line-strong bg-surface py-2.5 text-[13.5px] font-medium text-ink-soft transition-colors hover:border-warn-700 hover:text-warn-700"
               >
                 Reprovar
               </button>
-              <p className="text-[11.5px] leading-snug text-stone-400">
+              <p className="text-[11.5px] leading-snug text-ink-faint">
                 Decisão registrada na trilha de auditoria com seu usuário e
                 horário.
               </p>

@@ -24,11 +24,11 @@ export default async function PontoPage() {
   if (!resident) {
     return (
       <main className="flex flex-1 items-center justify-center p-6">
-        <div className="max-w-md rounded-2xl border border-amber-300 bg-amber-50 p-6 text-center">
-          <p className="text-[15px] font-semibold text-amber-900">
+        <div className="max-w-md rounded-2xl border border-warn-300 bg-warn-50 p-6 text-center">
+          <p className="text-[15px] font-semibold text-warn-900">
             Seu usuário ainda não tem cadastro de residente.
           </p>
-          <p className="mt-2 text-sm text-amber-800">
+          <p className="mt-2 text-sm text-warn-800">
             Fale com a administração para concluir o cadastro antes de registrar
             ponto.
           </p>

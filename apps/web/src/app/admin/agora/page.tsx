@@ -150,7 +150,7 @@ export default function AgoraPage() {
           <h1 className="text-[23px] font-semibold tracking-tight">
             Quem está na instituição
           </h1>
-          <p className="text-[13.5px] text-stone-500">
+          <p className="text-[13.5px] text-ink-muted">
             {updatedAt ? `Atualizado às ${updatedAt}` : "Carregando…"} · painel em
             tempo real
           </p>
@@ -158,13 +158,13 @@ export default function AgoraPage() {
         <div className="flex gap-2">
           <Link
             href="/admin/ajuste"
-            className="rounded-[10px] border border-stone-200 bg-white px-3.5 py-2.5 text-[13px] font-medium text-stone-700 transition-colors hover:border-teal-700 hover:text-teal-700"
+            className="rounded-[10px] border border-line bg-surface px-3.5 py-2.5 text-[13px] font-medium text-ink-soft transition-colors hover:border-brand-700 hover:text-brand-700"
           >
             Inserir ponto manual
           </Link>
           <button
             onClick={exportCsv}
-            className="cursor-pointer rounded-[10px] bg-teal-700 px-3.5 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-teal-800"
+            className="cursor-pointer rounded-[10px] bg-brand-700 px-3.5 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-brand-800"
           >
             Exportar
           </button>
@@ -208,12 +208,12 @@ export default function AgoraPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Buscar residente"
-          className="ml-auto w-[190px] rounded-[9px] border border-stone-200 bg-white px-3 py-2 text-[13px] outline-none focus:border-teal-700"
+          className="ml-auto w-[190px] rounded-[9px] border border-line bg-surface px-3 py-2 text-[13px] outline-none focus:border-brand-700"
         />
       </div>
 
-      <div className="overflow-x-auto rounded-[14px] border border-stone-200 bg-white">
-        <div className="grid min-w-[640px] grid-cols-[1.5fr_1fr_100px_110px_140px] gap-3 border-b border-stone-200 bg-stone-50 px-4.5 py-3 text-[11.5px] font-semibold tracking-wider text-stone-500 uppercase">
+      <div className="overflow-x-auto rounded-[14px] border border-line bg-surface">
+        <div className="grid min-w-[640px] grid-cols-[1.5fr_1fr_100px_110px_140px] gap-3 border-b border-line bg-surface-raised px-4.5 py-3 text-[11.5px] font-semibold tracking-wider text-ink-muted uppercase">
           <div>Residente</div>
           <div>Setor</div>
           <div>Desde</div>
@@ -221,7 +221,7 @@ export default function AgoraPage() {
           <div>Status</div>
         </div>
         {filtered.length === 0 && (
-          <div className="px-4.5 py-10 text-center text-sm text-stone-400">
+          <div className="px-4.5 py-10 text-center text-sm text-ink-faint">
             Ninguém na instituição com os filtros atuais.
           </div>
         )}
@@ -230,7 +230,7 @@ export default function AgoraPage() {
           return (
             <div
               key={p.resident_id}
-              className="grid min-w-[640px] grid-cols-[1.5fr_1fr_100px_110px_140px] items-center gap-3 border-b border-stone-100 px-4.5 py-3"
+              className="grid min-w-[640px] grid-cols-[1.5fr_1fr_100px_110px_140px] items-center gap-3 border-b border-line px-4.5 py-3"
             >
               <div className="flex items-center gap-2.5">
                 <Avatar name={p.full_name} tone={st.tone} />
@@ -238,16 +238,16 @@ export default function AgoraPage() {
                   <span className="truncate text-[13.5px] font-medium">
                     {p.full_name}
                   </span>
-                  <span className="text-[11.5px] text-stone-400">
+                  <span className="text-[11.5px] text-ink-faint">
                     {p.program ?? p.registration_number}
                   </span>
                 </div>
               </div>
-              <div className="text-[13px] text-stone-700">{p.sector_name}</div>
-              <div className="text-[13px] text-stone-700 tabular-nums">
+              <div className="text-[13px] text-ink-soft">{p.sector_name}</div>
+              <div className="text-[13px] text-ink-soft tabular-nums">
                 {localTime(p.first_in_datetime ?? p.event_datetime)}
               </div>
-              <div className="text-[13px] text-stone-700 tabular-nums">
+              <div className="text-[13px] text-ink-soft tabular-nums">
                 {fmtMin(elapsed(p))}
               </div>
               <div>

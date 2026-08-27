@@ -27,9 +27,32 @@ import {
   type TimeEntry,
   type TimeEventType,
 } from "@/lib/domain";
-import { Toast } from "@/components/ui";
+import { Badge, Button, Toast } from "@/components/ui";
 import { PunchMapModal } from "@/components/punch-map";
 import { GEO_MESSAGE, getCoords } from "@/lib/geo";
+import {
+  AlertIcon,
+  CloseIcon,
+  ListIcon,
+  LockIcon,
+  MapPinIcon,
+} from "@/components/icons";
+
+/** Estado da jornada em destaque — o residente entende a situação sem ler a linha do tempo. */
+function StatusBadge({
+  state,
+  openShift,
+}: {
+  state: ReturnType<typeof dayState>;
+  openShift: boolean;
+}) {
+  if (openShift)
+    return <Badge tone="warn">Jornada anterior em aberto</Badge>;
+  if (!state.hasClockIn) return <Badge tone="muted">Jornada não iniciada</Badge>;
+  if (state.hasClockOut) return <Badge tone="muted">Jornada encerrada</Badge>;
+  if (state.breakOpen) return <Badge tone="warn">Em intervalo</Badge>;
+  return <Badge tone="ok">Em jornada</Badge>;
+}
 
 export function PontoClient({
   resident,
@@ -182,22 +205,23 @@ export function PontoClient({
       <div className="grid w-full max-w-[940px] items-start gap-5 lg:grid-cols-[minmax(0,1fr)_316px]">
         <div className="flex flex-col gap-4">
           {openShift && (
-            <div className="flex gap-3 rounded-[14px] border border-amber-300 bg-amber-50 p-4">
-              <div className="flex h-[22px] w-[22px] flex-none items-center justify-center rounded-full bg-amber-700 text-[13px] font-bold text-white">
-                !
-              </div>
+            <div
+              role="alert"
+              className="flex gap-3 rounded-card border border-warn-300 bg-warn-50 p-4"
+            >
+              <AlertIcon className="mt-0.5 h-5 w-5 flex-none text-warn-700" />
               <div className="flex flex-col gap-1.5">
-                <p className="text-sm font-semibold text-amber-900">
+                <p className="text-sm font-semibold text-warn-900">
                   Jornada de {localDateBR(openShift.event_datetime)} sem registro
                   de saída
                 </p>
-                <p className="text-[13px] leading-relaxed text-amber-800">
+                <p className="text-[13px] leading-relaxed text-warn-800">
                   Você precisa justificar antes de iniciar uma nova jornada. A
                   administração é notificada automaticamente.
                 </p>
                 <Link
                   href="/justificar"
-                  className="mt-0.5 self-start rounded-[9px] bg-amber-700 px-3 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-amber-800"
+                  className="mt-1 inline-flex self-start rounded-field bg-warn-700 px-3.5 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-warn-800"
                 >
                   Justificar agora
                 </Link>
@@ -205,12 +229,18 @@ export function PontoClient({
             </div>
           )}
 
-          <div className="flex flex-col items-center gap-4.5 rounded-2xl border border-stone-200 bg-white p-6">
-            <div className="flex flex-col items-center gap-0.5">
-              <div className="text-[13px] text-stone-500">{todayLabel}</div>
-              <div className="text-[46px] leading-none font-semibold tracking-tighter tabular-nums">
+          <div className="flex flex-col items-center gap-4.5 rounded-panel border border-line bg-surface p-6 shadow-card">
+            <div className="flex flex-col items-center gap-1">
+              <div className="text-[13px] text-ink-muted">{todayLabel}</div>
+              {/* aria-live off: o relógio muda a cada segundo e seria
+                  anunciado sem parar pelo leitor de tela. */}
+              <div
+                aria-hidden
+                className="tnum text-[46px] leading-none font-semibold tracking-tighter"
+              >
                 {clock}
               </div>
+              <StatusBadge state={state} openShift={!!openShift} />
             </div>
 
             <button
@@ -221,36 +251,38 @@ export function PontoClient({
                   ? "O setor é definido no início da jornada"
                   : "Alterar setor"
               }
-              className="flex cursor-pointer items-center gap-2 rounded-full border border-teal-200 bg-teal-50 px-3.5 py-2 text-[13px] font-medium text-teal-700 transition-colors hover:bg-teal-100 disabled:cursor-default disabled:opacity-80"
+              className="flex cursor-pointer items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3.5 py-2 text-[13px] font-medium text-brand-700 transition-colors hover:bg-brand-100 disabled:cursor-default disabled:opacity-80"
             >
-              <span className="h-[7px] w-[7px] rounded-full bg-teal-700" />
+              <span className="h-1.75 w-1.75 rounded-full bg-brand-700" />
               <span>Setor: {sector?.name ?? "—"}</span>
-              {!sectorLocked && <span className="text-teal-400">alterar</span>}
+              {!sectorLocked && <span className="text-brand-600">alterar</span>}
             </button>
 
             {primary ? (
               <button
                 onClick={() => punch(primary)}
                 disabled={!!busy}
-                className="flex h-[216px] w-[216px] cursor-pointer flex-col items-center justify-center gap-1.5 rounded-full bg-teal-700 text-white shadow-[0_10px_30px_rgba(15,118,110,0.28)] transition-transform hover:bg-teal-800 active:scale-[0.98] disabled:opacity-70"
+                className={`flex h-56 w-56 cursor-pointer flex-col items-center justify-center gap-1.5 rounded-full bg-brand-700 text-white shadow-brand transition-transform hover:bg-brand-800 active:scale-[0.98] disabled:opacity-70 sm:h-60 sm:w-60 ${
+                  busy ? "" : "animate-pulse-ring"
+                }`}
               >
-                <span className="max-w-[150px] text-[23px] leading-tight font-semibold tracking-tight">
+                <span className="max-w-40 text-[23px] leading-tight font-semibold tracking-tight">
                   {busy === "geo"
                     ? "Obtendo localização…"
                     : busy === "save"
                       ? "Registrando…"
                       : EVENT_ACTION[primary]}
                 </span>
-                <span className="text-[12.5px] text-teal-200">{primaryHint}</span>
+                <span className="text-[12.5px] text-brand-200">{primaryHint}</span>
               </button>
             ) : (
-              <div className="flex h-[216px] w-[216px] flex-col items-center justify-center gap-1.5 rounded-full border border-dashed border-stone-300 bg-stone-50 text-center">
-                <span className="text-xl font-semibold text-stone-600">
+              <div className="flex h-56 w-56 flex-col items-center justify-center gap-1.5 rounded-full border border-dashed border-line-strong bg-surface-raised text-center sm:h-60 sm:w-60">
+                <span className="text-xl font-semibold text-ink-soft">
                   Jornada
                   <br />
                   encerrada
                 </span>
-                <span className="text-[12.5px] text-stone-400">
+                <span className="tnum text-[12.5px] text-ink-faint">
                   {fmtMin(worked)} registradas
                 </span>
               </div>
@@ -258,41 +290,40 @@ export function PontoClient({
 
             {secondary && (
               <div className="flex flex-col items-center gap-1.5">
-                <button
+                <Button
+                  variant="secondary"
                   onClick={() => punch(secondary)}
                   disabled={!!busy || !!secondaryBlock}
                   title={secondaryBlock ?? undefined}
-                  aria-disabled={!!secondaryBlock}
-                  className="cursor-pointer rounded-[10px] border border-stone-300 bg-white px-4.5 py-2.5 text-[13.5px] font-medium text-stone-700 transition-colors hover:border-teal-700 hover:text-teal-700 disabled:cursor-not-allowed disabled:border-stone-200 disabled:bg-stone-50 disabled:text-stone-400 disabled:hover:border-stone-200 disabled:hover:text-stone-400"
+                  icon={secondaryBlock ? <LockIcon className="h-4 w-4" /> : undefined}
                 >
-                  {secondaryBlock ? "🔒 " : ""}
                   {EVENT_ACTION[secondary]}
-                </button>
+                </Button>
                 {secondaryBlock && (
-                  <span className="max-w-[300px] text-center text-[12px] leading-snug text-amber-800">
+                  <span className="max-w-75 text-center text-[12px] leading-snug text-warn-800">
                     {secondaryBlock}
                   </span>
                 )}
               </div>
             )}
 
-            <p className="max-w-[340px] text-center text-xs leading-relaxed text-stone-400">
+            <p className="max-w-85 text-center text-xs leading-relaxed text-ink-faint">
               Cada batida grava sua localização (latitude/longitude), setor e
               dispositivo na trilha de auditoria.
             </p>
           </div>
         </div>
 
-        <div className="flex flex-col gap-3.5 rounded-2xl border border-stone-200 bg-white p-5">
+        <div className="flex flex-col gap-3.5 rounded-panel border border-line bg-surface p-5 shadow-card">
           <div className="flex items-baseline justify-between">
             <span className="text-sm font-semibold">Jornada de hoje</span>
-            <span className="text-[12.5px] text-stone-500 tabular-nums">
+            <span className="text-[12.5px] text-ink-muted tabular-nums">
               {fmtMin(worked)}
             </span>
           </div>
 
           {todayEvents.length === 0 && (
-            <div className="rounded-[11px] border border-dashed border-stone-200 px-3 py-5 text-center text-[13px] leading-relaxed text-stone-400">
+            <div className="rounded-[11px] border border-dashed border-line px-3 py-5 text-center text-[13px] leading-relaxed text-ink-faint">
               Nenhum evento hoje.
               <br />O primeiro registro abre a jornada.
             </div>
@@ -301,8 +332,8 @@ export function PontoClient({
           {todayEvents.map((ev) => (
             <div key={ev.id} className="flex gap-3">
               <div className="flex flex-none flex-col items-center pt-1">
-                <div className="h-[9px] w-[9px] rounded-full bg-teal-700" />
-                <div className="min-h-[26px] w-px flex-1 bg-stone-200" />
+                <div className="h-[9px] w-[9px] rounded-full bg-brand-700" />
+                <div className="min-h-[26px] w-px flex-1 bg-line" />
               </div>
               <div className="flex min-w-0 flex-1 flex-col gap-0.5 pb-3">
                 <div className="flex items-center justify-between gap-2">
@@ -317,21 +348,22 @@ export function PontoClient({
                           `${EVENT_LABEL[ev.event_type]} · ${localTime(ev.event_datetime)}`
                         )
                       }
-                      title="Ver localização no mapa"
-                      className="flex-none cursor-pointer rounded-md px-1.5 py-0.5 text-[11.5px] font-medium text-teal-700 hover:bg-teal-50"
+                      aria-label={`Ver no mapa: ${EVENT_LABEL[ev.event_type]} às ${localTime(ev.event_datetime)}`}
+                      className="flex flex-none cursor-pointer items-center gap-1 rounded-md px-1.5 py-0.5 text-[11.5px] font-medium text-brand-700 hover:bg-brand-50"
                     >
-                      📍 mapa
+                      <MapPinIcon className="h-3.5 w-3.5" />
+                      mapa
                     </button>
                   ) : (
                     <span
                       title="Batida sem localização"
-                      className="flex-none text-[11px] text-stone-300"
+                      className="flex-none text-[11px] text-ink-faint"
                     >
                       sem GPS
                     </span>
                   )}
                 </div>
-                <span className="text-xs text-stone-400">
+                <span className="text-xs text-ink-faint">
                   {localTime(ev.event_datetime)} ·{" "}
                   {ev.ponto_sectors?.name ?? ""} ·{" "}
                   {ev.origin === "manual" ? "manual" : "automático"}
@@ -342,12 +374,12 @@ export function PontoClient({
 
           {primary && (
             <div className="flex gap-3 opacity-65">
-              <div className="mt-1 h-[9px] w-[9px] flex-none rounded-full border border-dashed border-stone-400" />
+              <div className="mt-1 h-[9px] w-[9px] flex-none rounded-full border border-dashed border-ink-faint" />
               <div className="flex flex-col gap-0.5">
-                <span className="text-[13.5px] text-stone-500">
+                <span className="text-[13.5px] text-ink-muted">
                   {EVENT_LABEL[primary]}
                 </span>
-                <span className="text-xs text-stone-300">aguardando registro</span>
+                <span className="text-xs text-ink-faint">aguardando registro</span>
               </div>
             </div>
           )}
@@ -355,14 +387,15 @@ export function PontoClient({
           {todayWithCoords.length > 0 && (
             <button
               onClick={() => openMap(todayEvents, `Batidas de hoje · ${localDateBR(new Date())}`)}
-              className="cursor-pointer rounded-[9px] border border-teal-200 bg-teal-50 py-2 text-center text-[13px] font-medium text-teal-700 transition-colors hover:bg-teal-100"
+              className="flex cursor-pointer items-center justify-center gap-2 rounded-field border border-brand-200 bg-brand-50 py-2.5 text-center text-[13px] font-medium text-brand-700 transition-colors hover:bg-brand-100"
             >
+              <MapPinIcon className="h-4 w-4" />
               Ver todas no mapa ({todayWithCoords.length})
             </button>
           )}
 
-          <div className="mt-1 flex flex-col gap-2 border-t border-stone-100 pt-3.5">
-            <div className="flex justify-between text-[12.5px] text-stone-500">
+          <div className="mt-1 flex flex-col gap-2 border-t border-line pt-3.5">
+            <div className="flex justify-between text-[12.5px] text-ink-muted">
               <span>Intervalos</span>
               <span>
                 {breaks === 0
@@ -370,19 +403,20 @@ export function PontoClient({
                   : `${breaks} ${breaks === 1 ? "intervalo" : "intervalos"} · ${fmtMin(now ? breakMinutes(todayEvents, now) : 0)}${state.breakOpen ? " · em aberto" : ""}`}
               </span>
             </div>
-            <div className="flex justify-between text-[12.5px] text-stone-500">
+            <div className="flex justify-between text-[12.5px] text-ink-muted">
               <span>Setor atual</span>
               <span>{sector?.name ?? "—"}</span>
             </div>
-            <div className="flex justify-between text-[12.5px] text-stone-500">
+            <div className="flex justify-between text-[12.5px] text-ink-muted">
               <span>Origem</span>
               <span>Automático · web</span>
             </div>
           </div>
           <Link
             href="/registros"
-            className="rounded-[9px] border border-stone-200 bg-white py-2 text-center text-[13px] font-medium text-stone-700 transition-colors hover:border-teal-700 hover:text-teal-700"
+            className="flex items-center justify-center gap-2 rounded-field border border-line bg-surface py-2.5 text-center text-[13px] font-medium text-ink-soft transition-colors hover:border-brand-700 hover:text-brand-700"
           >
+            <ListIcon className="h-4 w-4" />
             Ver histórico completo
           </Link>
         </div>
@@ -390,11 +424,11 @@ export function PontoClient({
 
       {sheet && (
         <div
-          className="animate-fade-in fixed inset-0 z-20 flex items-end justify-center bg-stone-900/40"
+          className="animate-fade-in fixed inset-0 z-20 flex items-end justify-center bg-ink/40"
           onClick={() => setSheet(false)}
         >
           <div
-            className="animate-sheet-in flex w-full max-w-[520px] flex-col gap-4 rounded-t-[20px] bg-white p-5 pb-7"
+            className="animate-sheet-in flex w-full max-w-[520px] flex-col gap-4 rounded-t-[20px] bg-surface p-5 pb-7"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start justify-between">
@@ -402,15 +436,16 @@ export function PontoClient({
                 <span className="text-[19px] font-semibold tracking-tight">
                   Onde você está?
                 </span>
-                <span className="text-[13px] text-stone-500">
+                <span className="text-[13px] text-ink-muted">
                   O setor fica gravado junto ao evento de ponto.
                 </span>
               </div>
               <button
                 onClick={() => setSheet(false)}
-                className="h-[30px] w-[30px] cursor-pointer rounded-[9px] border border-stone-200 text-[15px] leading-none text-stone-500 hover:bg-stone-100"
+                aria-label="Fechar"
+                className="flex h-7.5 w-7.5 cursor-pointer items-center justify-center rounded-field border border-line text-ink-muted hover:bg-surface-raised"
               >
-                ×
+                <CloseIcon className="h-4 w-4" />
               </button>
             </div>
             <div className="flex max-h-[300px] flex-col gap-2 overflow-auto">
@@ -420,25 +455,25 @@ export function PontoClient({
                   onClick={() => setSectorId(s.id)}
                   className={`flex w-full cursor-pointer items-center gap-3 rounded-[11px] p-3 text-left ${
                     s.id === sectorId
-                      ? "border-2 border-teal-700 bg-teal-50"
-                      : "border border-stone-200 bg-white"
+                      ? "border-2 border-brand-700 bg-brand-50"
+                      : "border border-line bg-surface"
                   }`}
                 >
                   <span
                     className={`h-[11px] w-[11px] flex-none rounded-full ${
                       s.id === sectorId
-                        ? "bg-teal-700"
-                        : "border-[1.5px] border-stone-300"
+                        ? "bg-brand-700"
+                        : "border-[1.5px] border-line-strong"
                     }`}
                   />
                   <span className="text-sm font-medium">{s.name}</span>
-                  <span className="ml-auto text-xs text-stone-400">{s.code}</span>
+                  <span className="ml-auto text-xs text-ink-faint">{s.code}</span>
                 </button>
               ))}
             </div>
             <button
               onClick={() => setSheet(false)}
-              className="cursor-pointer rounded-[11px] bg-teal-700 py-3 text-[14.5px] font-semibold text-white transition-colors hover:bg-teal-800"
+              className="cursor-pointer rounded-[11px] bg-brand-700 py-3 text-[14.5px] font-semibold text-white transition-colors hover:bg-brand-800"
             >
               Confirmar setor
             </button>

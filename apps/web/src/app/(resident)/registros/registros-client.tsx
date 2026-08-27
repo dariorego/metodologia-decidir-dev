@@ -15,6 +15,7 @@ import {
   type TimeEntry,
 } from "@/lib/domain";
 import { Badge, Pill, StatCard } from "@/components/ui";
+import { DownloadIcon, MapPinIcon } from "@/components/icons";
 import { PunchMapModal } from "@/components/punch-map";
 
 type DayRow = {
@@ -156,51 +157,56 @@ export function RegistrosClient({
           </div>
           <button
             onClick={exportCsv}
-            className="cursor-pointer rounded-[9px] border border-stone-200 bg-white px-3.5 py-2 text-[13px] font-medium text-stone-700 transition-colors hover:border-teal-700 hover:text-teal-700"
+            className="cursor-pointer flex items-center gap-2 rounded-field border border-line bg-surface px-3.5 py-2 text-[13px] font-medium text-ink-soft transition-colors hover:border-brand-700 hover:text-brand-700"
           >
+            <DownloadIcon className="h-4 w-4" />
             Exportar CSV
           </button>
         </div>
 
-        <div className="overflow-hidden rounded-[14px] border border-stone-200 bg-white">
-          <div className="grid grid-cols-[110px_1fr_92px_128px] gap-3 border-b border-stone-200 bg-stone-50 px-4.5 py-3 text-[11.5px] font-semibold tracking-wider text-stone-500 uppercase">
+        {/* Cabeçalho de tabela só faz sentido quando há colunas: no mobile
+            cada dia vira um cartão empilhado. */}
+        <div className="overflow-hidden rounded-card border border-line bg-surface shadow-card">
+          <div className="hidden gap-3 border-b border-line bg-surface-raised px-4.5 py-3 text-[11.5px] font-semibold tracking-wider text-ink-muted uppercase sm:grid sm:grid-cols-[110px_1fr_92px_128px]">
             <div>Data</div>
             <div>Eventos</div>
             <div>Total</div>
             <div>Status</div>
           </div>
           {filtered.length === 0 && (
-            <div className="px-4.5 py-8 text-center text-sm text-stone-400">
+            <div className="px-4.5 py-10 text-center text-sm text-ink-faint">
               Nenhum registro no período.
             </div>
           )}
           {filtered.map((r) => (
             <div
               key={r.date}
-              className="grid grid-cols-[110px_1fr_92px_128px] items-center gap-3 border-b border-stone-100 px-4.5 py-3.5"
+              className="flex flex-col gap-2 border-b border-line px-4.5 py-3.5 last:border-0 sm:grid sm:grid-cols-[110px_1fr_92px_128px] sm:items-center sm:gap-3"
             >
-              <div className="flex flex-col">
+              <div className="flex items-baseline gap-2 sm:flex-col sm:gap-0">
                 <span className="text-[13.5px] font-medium">
                   {r.date.slice(8, 10)}/{r.date.slice(5, 7)}
                 </span>
-                <span className="text-[11.5px] text-stone-400">{r.weekday}</span>
+                <span className="text-[11.5px] text-ink-faint">{r.weekday}</span>
+                <span className="tnum ml-auto text-[13.5px] font-medium sm:hidden">
+                  {r.total}
+                </span>
               </div>
               <div className="flex flex-col gap-0.5">
-                <span className="text-[13px] text-stone-700 tabular-nums">
-                  {r.times}
-                </span>
-                <span className="text-[11.5px] text-stone-400">{r.sector}</span>
+                <span className="tnum text-[13px] text-ink-soft">{r.times}</span>
+                <span className="text-[11.5px] text-ink-faint">{r.sector}</span>
               </div>
-              <div className="text-[13.5px] tabular-nums">{r.total}</div>
-              <div className="flex flex-col items-start gap-1">
+              <div className="tnum hidden text-[13.5px] sm:block">{r.total}</div>
+              <div className="flex flex-wrap items-center gap-2 sm:flex-col sm:items-start sm:gap-1">
                 <Badge tone={r.tone}>{r.status}</Badge>
                 {r.geoCount > 0 && (
                   <button
                     onClick={() => setMapDay(r)}
-                    title="Ver localização das batidas no mapa"
-                    className="cursor-pointer rounded-md px-1 py-0.5 text-[11.5px] font-medium text-teal-700 hover:bg-teal-50"
+                    aria-label={`Ver no mapa as ${r.geoCount} batidas de ${r.date.slice(8, 10)}/${r.date.slice(5, 7)}`}
+                    className="flex cursor-pointer items-center gap-1 rounded-md px-1 py-0.5 text-[11.5px] font-medium text-brand-700 hover:bg-brand-50"
                   >
-                    📍 mapa ({r.geoCount})
+                    <MapPinIcon className="h-3.5 w-3.5" />
+                    mapa ({r.geoCount})
                   </button>
                 )}
               </div>
@@ -209,18 +215,18 @@ export function RegistrosClient({
         </div>
 
         {justifications.length > 0 && (
-          <div className="flex flex-col gap-3 rounded-[14px] border border-stone-200 bg-white p-4.5">
-            <span className="text-[12.5px] font-semibold tracking-wide text-stone-500 uppercase">
+          <div className="flex flex-col gap-3 rounded-card border border-line bg-surface p-4.5 shadow-card">
+            <span className="text-[12.5px] font-semibold tracking-wide text-ink-muted uppercase">
               Minhas justificativas
             </span>
             {justifications.map((j) => (
               <div
                 key={j.id}
-                className="flex items-start justify-between gap-3 border-b border-stone-100 pb-3 last:border-0 last:pb-0"
+                className="flex items-start justify-between gap-3 border-b border-line pb-3 last:border-0 last:pb-0"
               >
                 <div className="flex flex-col gap-0.5">
                   <span className="text-[13px] font-medium">{j.reason}</span>
-                  <span className="text-[11.5px] text-stone-400">
+                  <span className="text-[11.5px] text-ink-faint">
                     {new Date(j.created_at).toLocaleDateString("pt-BR", { timeZone: TZ })}
                     {j.review_notes ? ` · revisão: ${j.review_notes}` : ""}
                   </span>

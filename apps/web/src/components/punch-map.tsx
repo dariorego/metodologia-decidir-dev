@@ -22,6 +22,39 @@ function fmtCoord(lat: number, lng: number) {
 }
 
 /**
+ * Conteúdo do popup montado como nós do DOM.
+ * Leaflet atribui conteúdo em string via innerHTML, então valores interpolados
+ * (ex.: nome do setor, texto livre vindo do banco) seriam um vetor de XSS.
+ * Usando textContent nada é interpretado como HTML.
+ */
+function buildPopup(e: TimeEntry & { latitude: number; longitude: number }): HTMLElement {
+  const box = document.createElement("div");
+  box.style.font = "13px/1.4 system-ui";
+  box.style.minWidth = "180px";
+
+  const title = document.createElement("strong");
+  title.textContent = EVENT_LABEL[e.event_type];
+  box.append(title, document.createElement("br"));
+
+  const when = document.createElement("span");
+  when.textContent = `${localDateBR(e.event_datetime)} · ${localTime(e.event_datetime)}`;
+  box.append(when, document.createElement("br"));
+
+  const coords = document.createElement("span");
+  coords.style.color = "#78716c";
+  coords.textContent = fmtCoord(e.latitude, e.longitude);
+  box.append(coords);
+
+  if (e.ponto_sectors?.name) {
+    const sector = document.createElement("span");
+    sector.style.color = "#78716c";
+    sector.textContent = e.ponto_sectors.name;
+    box.append(document.createElement("br"), sector);
+  }
+  return box;
+}
+
+/**
  * Mapa (Leaflet + OpenStreetMap) com um marcador por batida.
  * Cada marcador mostra tipo, data/hora e coordenadas.
  */
@@ -62,14 +95,7 @@ export function PunchMap({ entries, className = "" }: { entries: TimeEntry[]; cl
             direction: "center",
             className: "punch-map-label",
           })
-          .bindPopup(
-            `<div style="font:13px/1.4 system-ui;min-width:180px">
-               <strong>${EVENT_LABEL[e.event_type]}</strong><br/>
-               ${localDateBR(e.event_datetime)} · ${localTime(e.event_datetime)}<br/>
-               <span style="color:#78716c">${fmtCoord(e.latitude, e.longitude)}</span>
-               ${e.ponto_sectors?.name ? `<br/><span style="color:#78716c">${e.ponto_sectors.name}</span>` : ""}
-             </div>`
-          )
+          .bindPopup(buildPopup(e))
           .addTo(map!);
       });
 
@@ -86,7 +112,7 @@ export function PunchMap({ entries, className = "" }: { entries: TimeEntry[]; cl
   const pts = entries.filter(hasCoords);
   if (pts.length === 0) {
     return (
-      <div className={`flex items-center justify-center rounded-[12px] border border-dashed border-stone-300 bg-stone-50 text-sm text-stone-400 ${className}`}>
+      <div className={`flex items-center justify-center rounded-[12px] border border-dashed border-line-strong bg-surface-raised text-sm text-ink-faint ${className}`}>
         Nenhuma batida com localização.
       </div>
     );
@@ -107,31 +133,31 @@ export function PunchMapModal({
   const pts = entries.filter(hasCoords);
   return (
     <div
-      className="animate-fade-in fixed inset-0 z-30 flex items-center justify-center bg-stone-900/50 p-4"
+      className="animate-fade-in fixed inset-0 z-30 flex items-center justify-center bg-ink/50 p-4"
       onClick={onClose}
     >
       <div
-        className="flex max-h-[92vh] w-full max-w-[760px] flex-col gap-3 overflow-hidden rounded-[18px] bg-white p-5"
+        className="flex max-h-[92vh] w-full max-w-[760px] flex-col gap-3 overflow-hidden rounded-[18px] bg-surface p-5"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex flex-col gap-0.5">
             <span className="text-[17px] font-semibold tracking-tight">{title}</span>
-            <span className="text-[12.5px] text-stone-500">
+            <span className="text-[12.5px] text-ink-muted">
               {pts.length} {pts.length === 1 ? "batida com localização" : "batidas com localização"}
               {pts.length < entries.length ? ` · ${entries.length - pts.length} sem localização` : ""}
             </span>
           </div>
           <button
             onClick={onClose}
-            className="h-[30px] w-[30px] flex-none cursor-pointer rounded-[9px] border border-stone-200 text-[15px] leading-none text-stone-500 hover:bg-stone-100"
+            className="h-[30px] w-[30px] flex-none cursor-pointer rounded-[9px] border border-line text-[15px] leading-none text-ink-muted hover:bg-surface-raised"
             aria-label="Fechar"
           >
             ×
           </button>
         </div>
 
-        <PunchMap entries={entries} className="h-[360px] w-full overflow-hidden border border-stone-200" />
+        <PunchMap entries={entries} className="h-[360px] w-full overflow-hidden border border-line" />
 
         {pts.length > 0 && (
           <div className="flex max-h-[180px] flex-col gap-1.5 overflow-auto">
@@ -144,10 +170,10 @@ export function PunchMapModal({
                   {i + 1}
                 </span>
                 <span className="font-medium">{EVENT_LABEL[e.event_type]}</span>
-                <span className="text-stone-500 tabular-nums">
+                <span className="text-ink-muted tabular-nums">
                   {localDateBR(e.event_datetime)} · {localTime(e.event_datetime)}
                 </span>
-                <span className="ml-auto text-stone-400 tabular-nums">
+                <span className="ml-auto text-ink-faint tabular-nums">
                   {fmtCoord(e.latitude, e.longitude)}
                 </span>
               </div>

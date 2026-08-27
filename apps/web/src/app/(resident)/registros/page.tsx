@@ -17,7 +17,7 @@ export default async function RegistrosPage() {
   if (!resident) {
     return (
       <main className="flex flex-1 items-center justify-center p-6">
-        <p className="text-sm text-stone-500">
+        <p className="text-sm text-ink-muted">
           Seu usuário ainda não tem cadastro de residente.
         </p>
       </main>

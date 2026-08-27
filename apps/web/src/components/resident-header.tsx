@@ -17,7 +17,7 @@ export function ResidentHeader({ name }: { name: string }) {
   }
 
   return (
-    <header className="sticky top-0 z-5 flex items-center justify-between border-b border-stone-200 bg-white px-6 py-3.5">
+    <header className="sticky top-0 z-5 flex items-center justify-between border-b border-line bg-surface px-6 py-3.5">
       <Link href="/ponto">
         <Logo />
       </Link>
@@ -25,27 +25,27 @@ export function ResidentHeader({ name }: { name: string }) {
         {pathname !== "/registros" ? (
           <Link
             href="/registros"
-            className="rounded-[9px] border border-stone-200 bg-white px-3 py-2 text-[13px] font-medium text-stone-700 transition-colors hover:border-teal-700 hover:text-teal-700"
+            className="rounded-[9px] border border-line bg-surface px-3 py-2 text-[13px] font-medium text-ink-soft transition-colors hover:border-brand-700 hover:text-brand-700"
           >
             Meus registros
           </Link>
         ) : (
           <Link
             href="/ponto"
-            className="rounded-[9px] border border-stone-200 bg-white px-3 py-2 text-[13px] font-medium text-stone-700 transition-colors hover:border-teal-700 hover:text-teal-700"
+            className="rounded-[9px] border border-line bg-surface px-3 py-2 text-[13px] font-medium text-ink-soft transition-colors hover:border-brand-700 hover:text-brand-700"
           >
             ← Ponto
           </Link>
         )}
         <button
           onClick={logout}
-          className="cursor-pointer rounded-[9px] px-3 py-2 text-[13px] text-stone-500 transition-colors hover:bg-stone-100"
+          className="cursor-pointer rounded-[9px] px-3 py-2 text-[13px] text-ink-muted transition-colors hover:bg-surface-raised"
         >
           Sair
         </button>
-        <div className="flex items-center gap-2 border-l border-stone-200 pl-2.5">
+        <div className="flex items-center gap-2 border-l border-line pl-2.5">
           <Avatar name={name} />
-          <span className="hidden text-[13px] text-stone-700 sm:block">{name}</span>
+          <span className="hidden text-[13px] text-ink-soft sm:block">{name}</span>
         </div>
       </div>
     </header>

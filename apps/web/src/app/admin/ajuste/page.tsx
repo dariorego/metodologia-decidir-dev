@@ -172,13 +172,13 @@ export default function AjustePage() {
         <h1 className="text-[23px] font-semibold tracking-tight">
           Inserir ou corrigir ponto
         </h1>
-        <p className="text-[13.5px] text-stone-500">
+        <p className="text-[13.5px] text-ink-muted">
           Toda alteração manual exige motivo e gera registro de auditoria.
         </p>
       </div>
 
       <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
-        <div className="flex min-w-0 flex-col gap-4 rounded-[14px] border border-stone-200 bg-white p-5">
+        <div className="flex min-w-0 flex-col gap-4 rounded-[14px] border border-line bg-surface p-5">
           <div className="grid gap-3.5 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
               <label className={labelCls}>Residente</label>
@@ -262,16 +262,16 @@ export default function AjustePage() {
               value={obs}
               onChange={(e) => setObs(e.target.value)}
               placeholder="Contexto que justifica a alteração."
-              className="min-h-[80px] resize-y rounded-[10px] border border-stone-200 px-3 py-2.5 text-sm leading-relaxed outline-none focus:border-teal-700"
+              className="min-h-[80px] resize-y rounded-[10px] border border-line px-3 py-2.5 text-sm leading-relaxed outline-none focus:border-brand-700"
             />
           </div>
 
-          <label className="flex items-center gap-2.5 rounded-[11px] bg-stone-50 p-3 text-[13px] text-stone-700">
+          <label className="flex items-center gap-2.5 rounded-[11px] bg-surface-raised p-3 text-[13px] text-ink-soft">
             <input
               type="checkbox"
               checked={needsApproval}
               onChange={(e) => setNeedsApproval(e.target.checked)}
-              className="h-[15px] w-[15px] accent-teal-700"
+              className="h-[15px] w-[15px] accent-brand-700"
             />
             Enviar para aprovação da coordenação
           </label>
@@ -290,12 +290,12 @@ export default function AjustePage() {
         </div>
 
         <div className="flex flex-col gap-3">
-          <div className="flex flex-col gap-3 rounded-[14px] border border-stone-200 bg-white p-4">
-            <span className="text-[12.5px] font-semibold tracking-wide text-stone-500 uppercase">
+          <div className="flex flex-col gap-3 rounded-[14px] border border-line bg-surface p-4">
+            <span className="text-[12.5px] font-semibold tracking-wide text-ink-muted uppercase">
               Jornada de {date.split("-").reverse().join("/")}
             </span>
             {dayEntries.length === 0 && (
-              <span className="text-[13px] text-stone-400">
+              <span className="text-[13px] text-ink-faint">
                 Nenhum evento registrado neste dia.
               </span>
             )}
@@ -304,7 +304,7 @@ export default function AjustePage() {
                 key={e.id}
                 className="flex items-center justify-between gap-2.5"
               >
-                <span className="text-[13px] text-stone-700">
+                <span className="text-[13px] text-ink-soft">
                   {EVENT_LABEL[e.event_type]}
                   {e.origin === "manual" ? " · manual" : ""}
                 </span>
@@ -315,28 +315,28 @@ export default function AjustePage() {
             ))}
           </div>
 
-          <div className="flex flex-col gap-2.5 rounded-[14px] border border-stone-200 bg-white p-4">
-            <span className="text-[12.5px] font-semibold tracking-wide text-stone-500 uppercase">
+          <div className="flex flex-col gap-2.5 rounded-[14px] border border-line bg-surface p-4">
+            <span className="text-[12.5px] font-semibold tracking-wide text-ink-muted uppercase">
               Trilha de auditoria
             </span>
             {audit.length === 0 && (
-              <span className="text-[13px] text-stone-400">
+              <span className="text-[13px] text-ink-faint">
                 Nenhum registro ainda.
               </span>
             )}
             {audit.map((l) => (
               <div
                 key={l.id}
-                className="flex flex-col gap-0.5 border-b border-stone-100 pb-2 last:border-0"
+                className="flex flex-col gap-0.5 border-b border-line pb-2 last:border-0"
               >
-                <span className="text-[12.5px] text-stone-900">
+                <span className="text-[12.5px] text-ink">
                   {l.action === "insert" ? "Ponto criado" : "Ponto alterado"}
                   {l.detail?.new?.origin === "manual" ? " manualmente" : ""}
                   {l.detail?.new?.event_type
                     ? ` · ${EVENT_LABEL[l.detail.new.event_type as TimeEventType]}`
                     : ""}
                 </span>
-                <span className="text-[11.5px] text-stone-400">
+                <span className="text-[11.5px] text-ink-faint">
                   {new Date(l.changed_at).toLocaleString("pt-BR", {
                     timeZone: TZ,
                     dateStyle: "short",

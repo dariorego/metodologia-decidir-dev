@@ -48,18 +48,18 @@ export default function LoginPage() {
 
   return (
     <div className="grid min-h-screen lg:grid-cols-[1.05fr_1fr]">
-      <div className="hidden flex-col justify-between bg-teal-700 p-14 text-teal-50 lg:flex">
+      <div className="hidden flex-col justify-between bg-brand-700 p-14 text-brand-50 lg:flex">
         <Logo dark />
         <div className="flex max-w-[420px] flex-col gap-4">
           <h1 className="font-serif text-[44px] leading-[1.08] tracking-tight">
             Um registro por evento. Nada de planilha no fim do mês.
           </h1>
-          <p className="text-[15px] leading-relaxed text-teal-200">
+          <p className="text-[15px] leading-relaxed text-brand-200">
             Início de jornada, intervalo, retorno e saída — com setor, trilha de
             auditoria e justificativa quando a jornada anterior fica aberta.
           </p>
         </div>
-        <div className="flex gap-7 text-[12.5px] text-teal-300">
+        <div className="flex gap-7 text-[12.5px] text-brand-300">
           <span>LGPD · dados em trânsito e em repouso</span>
           <span>v1.0 · MVP</span>
         </div>
@@ -75,14 +75,14 @@ export default function LoginPage() {
           </div>
           <div className="flex flex-col gap-1.5">
             <h2 className="text-2xl font-semibold tracking-tight">Entrar</h2>
-            <p className="text-sm text-stone-500">
+            <p className="text-sm text-ink-muted">
               Use suas credenciais da instituição.
             </p>
           </div>
 
           <div className="flex flex-col gap-3">
             <div className="flex flex-col gap-1.5">
-              <label className="text-[12.5px] font-medium text-stone-600">
+              <label className="text-[12.5px] font-medium text-ink-soft">
                 E-mail institucional
               </label>
               <input
@@ -90,12 +90,12 @@ export default function LoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="rounded-[10px] border border-stone-200 bg-white px-3.5 py-3 text-sm outline-none focus:border-teal-700"
+                className="rounded-[10px] border border-line bg-surface px-3.5 py-3 text-sm outline-none focus:border-brand-700"
                 placeholder="nome@instituicao.org.br"
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="text-[12.5px] font-medium text-stone-600">
+              <label className="text-[12.5px] font-medium text-ink-soft">
                 Senha
               </label>
               <input
@@ -103,14 +103,14 @@ export default function LoginPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="rounded-[10px] border border-stone-200 bg-white px-3.5 py-3 text-sm outline-none focus:border-teal-700"
+                className="rounded-[10px] border border-line bg-surface px-3.5 py-3 text-sm outline-none focus:border-brand-700"
                 placeholder="••••••••"
               />
             </div>
           </div>
 
           {error && (
-            <div className="rounded-[10px] border border-amber-300 bg-amber-50 px-3.5 py-3 text-[13px] text-amber-900">
+            <div className="rounded-[10px] border border-warn-300 bg-warn-50 px-3.5 py-3 text-[13px] text-warn-900">
               {error}
             </div>
           )}
@@ -118,11 +118,11 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="cursor-pointer rounded-[10px] bg-teal-700 py-3.5 text-[14.5px] font-semibold text-white transition-colors hover:bg-teal-800 disabled:bg-stone-300"
+            className="cursor-pointer rounded-[10px] bg-brand-700 py-3.5 text-[14.5px] font-semibold text-white transition-colors hover:bg-brand-800 disabled:bg-line-strong"
           >
             {loading ? "Entrando…" : "Entrar"}
           </button>
-          <p className="text-center text-[12.5px] text-stone-400">
+          <p className="text-center text-[12.5px] text-ink-faint">
             O perfil (residente ou administração) é definido pelo cadastro.
           </p>
         </form>

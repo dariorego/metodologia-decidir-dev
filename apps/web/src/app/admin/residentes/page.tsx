@@ -205,7 +205,7 @@ export default function ResidentesPage() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-col gap-1">
           <h1 className="text-[23px] font-semibold tracking-tight">Residentes</h1>
-          <p className="text-[13.5px] text-stone-500">
+          <p className="text-[13.5px] text-ink-muted">
             {activeCount} ativos · {residents.length - activeCount} inativos ·
             datas de entrada e saída na instituição
           </p>
@@ -229,12 +229,12 @@ export default function ResidentesPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Buscar por nome ou matrícula"
-          className="ml-auto w-[230px] rounded-[9px] border border-stone-200 bg-white px-3 py-2 text-[13px] outline-none focus:border-teal-700"
+          className="ml-auto w-[230px] rounded-[9px] border border-line bg-surface px-3 py-2 text-[13px] outline-none focus:border-brand-700"
         />
       </div>
 
-      <div className="overflow-x-auto rounded-[14px] border border-stone-200 bg-white">
-        <div className="grid min-w-[700px] grid-cols-[1.6fr_1fr_110px_110px_100px_84px] gap-3 border-b border-stone-200 bg-stone-50 px-4.5 py-3 text-[11.5px] font-semibold tracking-wider text-stone-500 uppercase">
+      <div className="overflow-x-auto rounded-[14px] border border-line bg-surface">
+        <div className="grid min-w-[700px] grid-cols-[1.6fr_1fr_110px_110px_100px_84px] gap-3 border-b border-line bg-surface-raised px-4.5 py-3 text-[11.5px] font-semibold tracking-wider text-ink-muted uppercase">
           <div>Residente</div>
           <div>Programa</div>
           <div>Entrada</div>
@@ -243,14 +243,14 @@ export default function ResidentesPage() {
           <div />
         </div>
         {filtered.length === 0 && (
-          <div className="px-4.5 py-10 text-center text-sm text-stone-400">
+          <div className="px-4.5 py-10 text-center text-sm text-ink-faint">
             Nenhum residente encontrado.
           </div>
         )}
         {filtered.map((r) => (
           <div
             key={r.id}
-            className="grid min-w-[700px] grid-cols-[1.6fr_1fr_110px_110px_100px_84px] items-center gap-3 border-b border-stone-100 px-4.5 py-3"
+            className="grid min-w-[700px] grid-cols-[1.6fr_1fr_110px_110px_100px_84px] items-center gap-3 border-b border-line px-4.5 py-3"
           >
             <div className="flex items-center gap-2.5">
               <Avatar
@@ -261,16 +261,16 @@ export default function ResidentesPage() {
                 <span className="truncate text-[13.5px] font-medium">
                   {r.ponto_profiles?.full_name}
                 </span>
-                <span className="text-[11.5px] text-stone-400">
+                <span className="text-[11.5px] text-ink-faint">
                   {r.registration_number}
                 </span>
               </div>
             </div>
-            <div className="text-[13px] text-stone-700">{r.program ?? "—"}</div>
-            <div className="text-[13px] text-stone-700 tabular-nums">
+            <div className="text-[13px] text-ink-soft">{r.program ?? "—"}</div>
+            <div className="text-[13px] text-ink-soft tabular-nums">
               {localDateBR(`${r.entry_date}T12:00:00-03:00`)}
             </div>
-            <div className="text-[13px] text-stone-500 tabular-nums">
+            <div className="text-[13px] text-ink-muted tabular-nums">
               {r.exit_date ? localDateBR(`${r.exit_date}T12:00:00-03:00`) : "—"}
             </div>
             <div>
@@ -280,7 +280,7 @@ export default function ResidentesPage() {
             </div>
             <button
               onClick={() => openEdit(r)}
-              className="cursor-pointer justify-self-start rounded-lg border border-stone-200 bg-white px-2.5 py-1.5 text-xs text-stone-600 transition-colors hover:border-teal-700 hover:text-teal-700"
+              className="cursor-pointer justify-self-start rounded-lg border border-line bg-surface px-2.5 py-1.5 text-xs text-ink-soft transition-colors hover:border-brand-700 hover:text-brand-700"
             >
               Editar
             </button>
@@ -290,11 +290,11 @@ export default function ResidentesPage() {
 
       {modal && (
         <div
-          className="animate-fade-in fixed inset-0 z-20 flex items-center justify-center bg-stone-900/40 p-4"
+          className="animate-fade-in fixed inset-0 z-20 flex items-center justify-center bg-ink/40 p-4"
           onClick={() => setModal(null)}
         >
           <div
-            className="animate-sheet-in flex max-h-[90vh] w-full max-w-[520px] flex-col gap-4 overflow-auto rounded-[16px] bg-white p-5"
+            className="animate-sheet-in flex max-h-[90vh] w-full max-w-[520px] flex-col gap-4 overflow-auto rounded-[16px] bg-surface p-5"
             onClick={(e) => e.stopPropagation()}
           >
             <span className="text-lg font-semibold tracking-tight">
@@ -405,7 +405,7 @@ export default function ResidentesPage() {
             </div>
 
             {error && (
-              <div className="rounded-[10px] border border-amber-300 bg-amber-50 px-3.5 py-3 text-[13px] text-amber-900">
+              <div className="rounded-[10px] border border-warn-300 bg-warn-50 px-3.5 py-3 text-[13px] text-warn-900">
                 {error}
               </div>
             )}
@@ -419,7 +419,7 @@ export default function ResidentesPage() {
               </button>
             </div>
             {modal === "new" && (
-              <p className="text-xs leading-relaxed text-stone-400">
+              <p className="text-xs leading-relaxed text-ink-faint">
                 O residente entra com o e-mail e a senha provisória. Se o projeto
                 exigir confirmação de e-mail, ele recebe o link antes do primeiro
                 acesso.

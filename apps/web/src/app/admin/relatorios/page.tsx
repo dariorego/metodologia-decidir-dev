@@ -169,7 +169,7 @@ export default function RelatoriosPage() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-col gap-1">
           <h1 className="text-[23px] font-semibold tracking-tight">Relatórios</h1>
-          <p className="text-[13.5px] text-stone-500">
+          <p className="text-[13.5px] text-ink-muted">
             Consolidação diária · período de {fmtDate(range.from)} a{" "}
             {fmtDate(range.to)}
           </p>
@@ -186,13 +186,13 @@ export default function RelatoriosPage() {
           </select>
           <button
             onClick={exportCsv}
-            className="cursor-pointer rounded-[10px] border border-stone-200 bg-white px-3.5 py-2.5 text-[13px] font-medium text-stone-700 transition-colors hover:border-teal-700 hover:text-teal-700"
+            className="cursor-pointer rounded-[10px] border border-line bg-surface px-3.5 py-2.5 text-[13px] font-medium text-ink-soft transition-colors hover:border-brand-700 hover:text-brand-700"
           >
             CSV
           </button>
           <button
             onClick={() => window.print()}
-            className="cursor-pointer rounded-[10px] bg-teal-700 px-3.5 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-teal-800"
+            className="cursor-pointer rounded-[10px] bg-brand-700 px-3.5 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-brand-800"
           >
             PDF
           </button>
@@ -224,10 +224,10 @@ export default function RelatoriosPage() {
       </div>
 
       <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="flex min-w-0 flex-col gap-4 rounded-[14px] border border-stone-200 bg-white p-5">
+        <div className="flex min-w-0 flex-col gap-4 rounded-[14px] border border-line bg-surface p-5">
           <div className="flex items-baseline justify-between">
             <span className="text-[14.5px] font-semibold">Horas por dia</span>
-            <span className="text-xs text-stone-400">últimos 14 dias do período</span>
+            <span className="text-xs text-ink-faint">últimos 14 dias do período</span>
           </div>
           <div className="flex h-[170px] items-end gap-2">
             {report.bars.map((b, i) => (
@@ -237,37 +237,37 @@ export default function RelatoriosPage() {
               >
                 <div
                   className={`w-full rounded-t-[5px] ${
-                    i === report.bars.length - 1 ? "bg-teal-700" : "bg-teal-200"
+                    i === report.bars.length - 1 ? "bg-brand-700" : "bg-brand-200"
                   }`}
                   style={{ height: `${Math.round((b.minutes / report.maxBar) * 100)}%` }}
                   title={fmtMin(b.minutes)}
                 />
-                <span className="text-[10.5px] text-stone-400">{b.day}</span>
+                <span className="text-[10.5px] text-ink-faint">{b.day}</span>
               </div>
             ))}
             {report.bars.length === 0 && (
-              <span className="text-sm text-stone-400">Sem dados no período.</span>
+              <span className="text-sm text-ink-faint">Sem dados no período.</span>
             )}
           </div>
         </div>
 
         <div className="flex flex-col gap-3">
-          <div className="flex flex-col gap-3 rounded-[14px] border border-stone-200 bg-white p-4.5">
-            <span className="text-[12.5px] font-semibold tracking-wide text-stone-500 uppercase">
+          <div className="flex flex-col gap-3 rounded-[14px] border border-line bg-surface p-4.5">
+            <span className="text-[12.5px] font-semibold tracking-wide text-ink-muted uppercase">
               Por setor
             </span>
             {report.sectorStats.length === 0 && (
-              <span className="text-[13px] text-stone-400">Sem dados.</span>
+              <span className="text-[13px] text-ink-faint">Sem dados.</span>
             )}
             {report.sectorStats.map(([name, minutes]) => (
               <div key={name} className="flex flex-col gap-1.5">
                 <div className="flex justify-between text-[13px]">
-                  <span className="text-stone-700">{name}</span>
+                  <span className="text-ink-soft">{name}</span>
                   <span className="font-medium">{fmtMin(minutes)}</span>
                 </div>
-                <div className="h-1.5 overflow-hidden rounded-full bg-stone-100">
+                <div className="h-1.5 overflow-hidden rounded-full bg-surface-raised">
                   <div
-                    className="h-full rounded-full bg-teal-700"
+                    className="h-full rounded-full bg-brand-700"
                     style={{ width: `${Math.round((minutes / report.maxSector) * 100)}%` }}
                   />
                 </div>
@@ -277,8 +277,8 @@ export default function RelatoriosPage() {
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-[14px] border border-stone-200 bg-white">
-        <div className="grid min-w-[720px] grid-cols-[1.4fr_100px_1.4fr_1fr_90px_120px] gap-3 border-b border-stone-200 bg-stone-50 px-4.5 py-3 text-[11.5px] font-semibold tracking-wider text-stone-500 uppercase">
+      <div className="overflow-x-auto rounded-[14px] border border-line bg-surface">
+        <div className="grid min-w-[720px] grid-cols-[1.4fr_100px_1.4fr_1fr_90px_120px] gap-3 border-b border-line bg-surface-raised px-4.5 py-3 text-[11.5px] font-semibold tracking-wider text-ink-muted uppercase">
           <div>Residente</div>
           <div>Data</div>
           <div>Eventos</div>
@@ -287,30 +287,30 @@ export default function RelatoriosPage() {
           <div>Status</div>
         </div>
         {loading && (
-          <div className="px-4.5 py-8 text-center text-sm text-stone-400">Carregando…</div>
+          <div className="px-4.5 py-8 text-center text-sm text-ink-faint">Carregando…</div>
         )}
         {!loading && report.rows.length === 0 && (
-          <div className="px-4.5 py-8 text-center text-sm text-stone-400">
+          <div className="px-4.5 py-8 text-center text-sm text-ink-faint">
             Nenhum registro no período.
           </div>
         )}
         {report.rows.slice(0, 200).map((r, i) => (
           <div
             key={`${r.resident}-${r.date}-${i}`}
-            className="grid min-w-[720px] grid-cols-[1.4fr_100px_1.4fr_1fr_90px_120px] items-center gap-3 border-b border-stone-100 px-4.5 py-2.5 text-[13px]"
+            className="grid min-w-[720px] grid-cols-[1.4fr_100px_1.4fr_1fr_90px_120px] items-center gap-3 border-b border-line px-4.5 py-2.5 text-[13px]"
           >
             <div className="truncate font-medium">{r.resident}</div>
             <div className="tabular-nums">{r.date.split("-").reverse().join("/")}</div>
-            <div className="text-stone-700 tabular-nums">{r.events}</div>
-            <div className="text-stone-500">{r.sector}</div>
+            <div className="text-ink-soft tabular-nums">{r.events}</div>
+            <div className="text-ink-muted">{r.sector}</div>
             <div className="tabular-nums">{fmtMin(r.minutes)}</div>
-            <div className={r.status === "Sem saída" ? "text-amber-700" : "text-stone-500"}>
+            <div className={r.status === "Sem saída" ? "text-warn-700" : "text-ink-muted"}>
               {r.status}
             </div>
           </div>
         ))}
         {report.rows.length > 200 && (
-          <div className="px-4.5 py-3 text-center text-xs text-stone-400">
+          <div className="px-4.5 py-3 text-center text-xs text-ink-faint">
             Mostrando 200 de {report.rows.length} linhas — use o CSV para o relatório completo.
           </div>
         )}

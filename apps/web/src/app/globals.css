@@ -1,17 +1,115 @@
 @import "tailwindcss";
 
+/* ============================================================
+   Tokens — identidade teal/stone do Ponto Residentes.
+   Camada semântica: os componentes usam estes nomes, não valores
+   soltos, para que ajuste de marca aconteça em um lugar só.
+   ============================================================ */
 @theme {
   --font-sans: var(--font-instrument-sans), system-ui, sans-serif;
   --font-serif: var(--font-instrument-serif), Georgia, serif;
+
+  /* Marca */
+  --color-brand-50: #f0fdfa;
+  --color-brand-100: #ccfbf1;
+  --color-brand-200: #99f6e4;
+  --color-brand-300: #5eead4;
+  --color-brand-600: #0d9488;
+  --color-brand-700: #0f766e;
+  --color-brand-800: #115e59;
+  --color-brand-900: #134e4a;
+
+  /* Superfícies e texto */
+  --color-surface: #ffffff;
+  --color-surface-sunken: #faf9f7;
+  --color-surface-raised: #f5f5f4;
+  --color-ink: #1c1917;
+  --color-ink-soft: #57534e;
+  --color-ink-muted: #78716c;
+  --color-ink-faint: #a8a29e;
+  --color-line: #e7e5e4;
+  --color-line-strong: #d6d3d1;
+
+  /* Estados */
+  --color-warn-50: #fffbeb;
+  --color-warn-200: #fde68a;
+  --color-warn-300: #fcd34d;
+  --color-warn-700: #b45309;
+  --color-warn-800: #92400e;
+  --color-warn-900: #78350f;
+  --color-danger-50: #fef2f2;
+  --color-danger-300: #fca5a5;
+  --color-danger-700: #b91c1c;
+
+  /* Raios — escala consistente no lugar de valores avulsos */
+  --radius-field: 10px;
+  --radius-card: 14px;
+  --radius-panel: 18px;
+
+  /* Sombras discretas, coerentes com o fundo quente */
+  --shadow-card: 0 1px 2px rgba(28, 25, 23, 0.04);
+  --shadow-raised: 0 4px 16px rgba(28, 25, 23, 0.08);
+  --shadow-brand: 0 10px 30px rgba(15, 118, 110, 0.28);
 }
 
 body {
-  background: #faf9f7;
-  color: #1c1917;
+  background: var(--color-surface-sunken);
+  color: var(--color-ink);
   -webkit-font-smoothing: antialiased;
   font-family: var(--font-sans);
+  /* Respeita notch/gesture bar — o app é usado no celular. */
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
+/* ============================================================
+   Acessibilidade
+   ============================================================ */
+
+/* Foco visível e consistente em tudo que recebe teclado.
+   :focus-visible não aparece no clique de mouse, só na navegação. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-brand-700);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Alvo de toque mínimo de 44px no mobile (WCAG 2.5.5). */
+@media (pointer: coarse) {
+  button,
+  a[role="button"],
+  [type="submit"] {
+    min-height: 44px;
+  }
+}
+
+/* Quem pediu menos movimento no sistema não recebe animação. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Visível só para leitores de tela. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ============================================================
+   Animações
+   ============================================================ */
 @keyframes toast-in {
   from {
     opacity: 0;
@@ -43,6 +141,18 @@ body {
   }
 }
 
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgba(15, 118, 110, 0.35);
+  }
+  70% {
+    box-shadow: 0 0 0 14px rgba(15, 118, 110, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(15, 118, 110, 0);
+  }
+}
+
 .animate-toast-in {
   animation: toast-in 0.22s cubic-bezier(0.2, 0.8, 0.3, 1);
 }
@@ -52,8 +162,18 @@ body {
 .animate-fade-in {
   animation: fade-in 0.16s ease;
 }
+.animate-pulse-ring {
+  animation: pulse-ring 2.4s cubic-bezier(0.2, 0.8, 0.3, 1) infinite;
+}
 
-/* Rótulo numérico dos marcadores do mapa de batidas (Leaflet) */
+/* Números alinhados em colunas (horários, totais). */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================
+   Mapa das batidas (Leaflet)
+   ============================================================ */
 .punch-map-label {
   background: transparent;
   border: 0;
@@ -65,4 +185,10 @@ body {
 }
 .punch-map-label::before {
   display: none;
+}
+.leaflet-container {
+  font-family: var(--font-sans);
+}
+.leaflet-popup-content-wrapper {
+  border-radius: var(--radius-field);
 }

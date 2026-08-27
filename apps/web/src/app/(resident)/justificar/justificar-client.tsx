@@ -97,10 +97,10 @@ export function JustificarClient({
     <main className="flex flex-1 items-center justify-center bg-[#fffdf7] px-6 py-10">
       <div className="flex w-full max-w-[600px] flex-col gap-5">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-6 w-6 items-center justify-center rounded-[7px] bg-amber-700 text-[13px] font-bold text-white">
+          <div className="flex h-6 w-6 items-center justify-center rounded-[7px] bg-warn-700 text-[13px] font-bold text-white">
             !
           </div>
-          <span className="text-[13px] font-semibold tracking-wider text-amber-800 uppercase">
+          <span className="text-[13px] font-semibold tracking-wider text-warn-800 uppercase">
             Justificativa obrigatória
           </span>
         </div>
@@ -109,38 +109,38 @@ export function JustificarClient({
           <h1 className="text-[27px] leading-tight font-semibold tracking-tight">
             Sua jornada de {openDate} não foi encerrada
           </h1>
-          <p className="text-[14.5px] leading-relaxed text-stone-600">
+          <p className="text-[14.5px] leading-relaxed text-ink-soft">
             Para iniciar uma nova jornada, informe o que aconteceu. A
             administração recebe a justificativa para revisão e o registro fica
             na trilha de auditoria.
           </p>
         </div>
 
-        <div className="flex flex-col gap-3 rounded-[14px] border border-stone-200 bg-white p-4">
-          <span className="text-[12.5px] font-semibold tracking-wide text-stone-500 uppercase">
+        <div className="flex flex-col gap-3 rounded-[14px] border border-line bg-surface p-4">
+          <span className="text-[12.5px] font-semibold tracking-wide text-ink-muted uppercase">
             Registro em aberto
           </span>
           <div className="flex flex-col gap-2">
             <div className="flex justify-between text-[13.5px]">
-              <span className="text-stone-500">Início de jornada</span>
+              <span className="text-ink-muted">Início de jornada</span>
               <span className="font-medium">
                 {openDate} · {localTime(openShift.event_datetime)}
               </span>
             </div>
             <div className="flex justify-between text-[13.5px]">
-              <span className="text-stone-500">Setor</span>
+              <span className="text-ink-muted">Setor</span>
               <span className="font-medium">
                 {openShift.ponto_sectors?.name ?? "—"}
               </span>
             </div>
             <div className="flex justify-between text-[13.5px]">
-              <span className="text-stone-500">Fim de jornada</span>
-              <span className="font-semibold text-amber-700">não registrado</span>
+              <span className="text-ink-muted">Fim de jornada</span>
+              <span className="font-semibold text-warn-700">não registrado</span>
             </div>
           </div>
         </div>
 
-        <div className="flex flex-col gap-3.5 rounded-[14px] border border-stone-200 bg-white p-4.5">
+        <div className="flex flex-col gap-3.5 rounded-[14px] border border-line bg-surface p-4.5">
           <div className="flex flex-col gap-2">
             <label className="text-[13px] font-semibold">Motivo</label>
             <div className="flex flex-wrap gap-2">
@@ -157,20 +157,20 @@ export function JustificarClient({
               <label className="text-[13px] font-semibold">
                 Horário real de saída
               </label>
-              <span className="text-xs text-stone-400">{openDate}</span>
+              <span className="text-xs text-ink-faint">{openDate}</span>
             </div>
             <input
               value={exitTime}
               onChange={(e) => setExitTime(e.target.value)}
               placeholder="ex.: 07:20"
-              className="rounded-[10px] border border-stone-200 px-3 py-2.5 text-sm outline-none focus:border-teal-700"
+              className="rounded-[10px] border border-line px-3 py-2.5 text-sm outline-none focus:border-brand-700"
             />
           </div>
 
           <div className="flex flex-col gap-2">
             <div className="flex items-baseline justify-between">
               <label className="text-[13px] font-semibold">Descrição</label>
-              <span className="text-xs text-stone-400">
+              <span className="text-xs text-ink-faint">
                 {chars >= MIN_CHARS
                   ? "mínimo atingido"
                   : `mínimo de ${MIN_CHARS} caracteres · faltam ${MIN_CHARS - chars}`}
@@ -180,13 +180,13 @@ export function JustificarClient({
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder="Descreva o que impediu o registro de saída."
-              className="min-h-[92px] resize-y rounded-[10px] border border-stone-200 px-3 py-2.5 text-sm leading-relaxed outline-none focus:border-teal-700"
+              className="min-h-[92px] resize-y rounded-[10px] border border-line px-3 py-2.5 text-sm leading-relaxed outline-none focus:border-brand-700"
             />
           </div>
         </div>
 
         {error && (
-          <div className="rounded-[10px] border border-amber-300 bg-amber-50 px-3.5 py-3 text-[13px] text-amber-900">
+          <div className="rounded-[10px] border border-warn-300 bg-warn-50 px-3.5 py-3 text-[13px] text-warn-900">
             {error}
           </div>
         )}
@@ -200,14 +200,14 @@ export function JustificarClient({
             disabled={!ok || busy}
             className={`flex-1 rounded-[11px] py-3 text-sm font-semibold text-white transition-colors ${
               ok
-                ? "cursor-pointer bg-teal-700 hover:bg-teal-800"
-                : "cursor-not-allowed bg-stone-300"
+                ? "cursor-pointer bg-brand-700 hover:bg-brand-800"
+                : "cursor-not-allowed bg-line-strong"
             }`}
           >
             {busy ? "Enviando…" : "Enviar e iniciar jornada"}
           </button>
         </div>
-        <p className="text-xs leading-relaxed text-stone-400">
+        <p className="text-xs leading-relaxed text-ink-faint">
           {ok
             ? "A administração será notificada e a jornada de hoje será aberta em seguida."
             : "Selecione um motivo e escreva ao menos 20 caracteres para continuar."}

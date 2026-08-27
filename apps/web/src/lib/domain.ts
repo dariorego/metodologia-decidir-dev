@@ -204,14 +204,19 @@ export function sequenceErrorMessage(message: string): string | null {
   const code = rest.split(":")[0];
   const map: Record<string, string> = {
     GEO_REQUIRED: "Não foi possível obter sua localização. Ative o GPS/permissão e tente de novo.",
+    GEO_INVALID: "As coordenadas recebidas são inválidas. Tente registrar novamente.",
     CLOCK_IN_EXISTS: "A entrada da jornada já foi registrada hoje.",
     CLOCK_OUT_EXISTS: "A saída da jornada já foi registrada hoje.",
     NO_CLOCK_IN: "Registre a entrada da jornada primeiro.",
     SHIFT_CLOSED: "A jornada de hoje já foi encerrada.",
     BREAK_OPEN: "Encerre o intervalo em aberto antes de continuar.",
     NO_OPEN_BREAK: "Não há intervalo em aberto.",
+    OUT_OF_ORDER: "O horário informado é anterior à última batida do dia.",
+    FUTURE_TIME: "Não é possível registrar ponto com data/hora no futuro.",
   };
-  return map[code] ?? rest.split(":").slice(1).join(":").trim();
+  // Nunca repassa o texto bruto do Postgres: ele expõe nomes de tabela e
+  // de constraint para o usuário final.
+  return map[code] ?? "Não foi possível registrar a batida. Tente novamente.";
 }
 
 export function hasCoords(
