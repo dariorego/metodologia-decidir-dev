@@ -126,17 +126,16 @@ begin
 end $$;
 
 -- ------------------------------------------------------------
--- Idempotência da fila offline
+-- Idempotência da fila offline — nada a fazer aqui
 --
--- O app gera o UUID da batida ANTES de enviar e reenvia o mesmo id
--- até confirmar. Como id é primary key, um reenvio colide (23505) e
--- o app trata como "já sincronizada" — nunca duplica.
--- Esta policy permite que o residente informe o próprio id.
+-- O app gera o UUID da batida ANTES de enviar e reenvia o mesmo id até
+-- confirmar. Como id é primary key, o reenvio colide (23505) e o app
+-- trata como "já sincronizada" — é isso que impede a duplicata.
+--
+-- Nenhuma mudança de policy é necessária: RLS decide QUAIS linhas podem
+-- ser inseridas, não QUAIS COLUNAS o cliente pode preencher. A policy
+-- ponto_time_entries_insert_self da 0001 já permite o insert, e informar
+-- o próprio id sempre foi possível. Registrado aqui para quem for ler a
+-- migration procurando onde a idempotência é garantida: ela vem da
+-- primary key, não de RLS.
 -- ------------------------------------------------------------
-drop policy if exists ponto_time_entries_insert_self on ponto_time_entries;
-create policy ponto_time_entries_insert_self on ponto_time_entries for insert
-  with check (
-    origin = 'automatic'
-    and created_by = auth.uid()
-    and resident_id in (select id from ponto_residents where profile_id = auth.uid())
-  );
