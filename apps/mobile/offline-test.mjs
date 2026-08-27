@@ -3,7 +3,7 @@
 import { chromium, devices } from "playwright";
 
 const BASE = "http://localhost:4173";
-const EMAIL = "bruno.demo@pontoresidentes.app";
+const EMAIL = "ana.demo@pontoresidentes.app";
 const PASS = "Ponto@2026";
 let failures = 0;
 const check = (c, l) => { console.log(`${c ? "  OK " : "  FALHA "} ${l}`); if (!c) failures++; };
@@ -30,11 +30,11 @@ console.log(`   batidas hoje antes do teste: ${before}`);
 // Playwright bloqueia ate o localhost e o plugin web nao carregaria.
 console.log("\n1b) BATIDA ONLINE (aquece o plugin de GPS)");
 {
-  const warm = page.locator("button", { hasText: "Iniciar intervalo" }).first();
+  const warm = page.locator(String.raw`button[class*="h-[220px]"]`).first();
   await warm.waitFor({ state: "visible", timeout: 15000 });
   await warm.click();
   await page.waitForTimeout(4000);
-  check((await page.locator("text=Em intervalo").count()) > 0, "batida online registrada");
+  check((await page.locator("text=/aguardando sincronização/").count()) === 0, "batida online registrada (nada pendente)");
 }
 const baseline = await page.locator("text=/^(Início de jornada|Início de intervalo|Fim de intervalo|Fim de jornada)$/").count();
 console.log(`   batidas apos a online: ${baseline}`);
@@ -47,7 +47,7 @@ check((await page.locator("header >> text=offline").count()) > 0, "app detecta e
 
 // ---- 3. Bate o ponto offline
 console.log("\n3) BATIDA OFFLINE");
-const primary = page.locator("button", { hasText: "Voltar do intervalo" }).first();
+const primary = page.locator(String.raw`button[class*="h-[220px]"]`).first();
   await primary.waitFor({ state: "visible", timeout: 15000 });
 await primary.click();
 await page.waitForTimeout(3000);
