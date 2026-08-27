@@ -119,23 +119,105 @@ export function fmtMin(m: number): string {
   return `${h}h ${String(mm).padStart(2, "0")}m`;
 }
 
-/** Próximo evento primário esperado, a partir do último evento do dia */
-export function nextEvent(todayEvents: TimeEntry[]): TimeEventType | null {
-  if (!todayEvents.length) return "clock_in";
-  const last = todayEvents[todayEvents.length - 1].event_type;
-  if (last === "clock_in") return "break_start";
-  if (last === "break_start") return "break_end";
-  if (last === "break_end") return "clock_out";
-  return null; // jornada encerrada
+/** Estado da jornada do dia, derivado da sequência de eventos */
+export interface DayState {
+  hasClockIn: boolean;
+  hasClockOut: boolean;
+  /** Intervalo iniciado e ainda não encerrado */
+  breakOpen: boolean;
+  breakCount: number;
 }
 
-/** Evento secundário (atalho) */
+export function dayState(todayEvents: TimeEntry[]): DayState {
+  let hasClockIn = false;
+  let hasClockOut = false;
+  let breakOpen = false;
+  let breakCount = 0;
+  for (const e of todayEvents) {
+    if (e.event_type === "clock_in") hasClockIn = true;
+    if (e.event_type === "clock_out") hasClockOut = true;
+    if (e.event_type === "break_start") {
+      breakOpen = true;
+      breakCount += 1;
+    }
+    if (e.event_type === "break_end") breakOpen = false;
+  }
+  return { hasClockIn, hasClockOut, breakOpen, breakCount };
+}
+
+/**
+ * Motivo pelo qual uma batida está bloqueada (null = permitida).
+ * Regras: entrada e saída 1x/dia; intervalos N x/dia sempre início→fim;
+ * saída somente com todos os intervalos encerrados.
+ */
+export function blockReason(kind: TimeEventType, todayEvents: TimeEntry[]): string | null {
+  const st = dayState(todayEvents);
+  switch (kind) {
+    case "clock_in":
+      return st.hasClockIn ? "A entrada da jornada já foi registrada hoje." : null;
+    case "break_start":
+      if (!st.hasClockIn) return "Registre a entrada da jornada antes do intervalo.";
+      if (st.hasClockOut) return "A jornada de hoje já foi encerrada.";
+      if (st.breakOpen) return "Encerre o intervalo em aberto antes de iniciar outro.";
+      return null;
+    case "break_end":
+      if (!st.breakOpen) return "Não há intervalo em aberto.";
+      return null;
+    case "clock_out":
+      if (!st.hasClockIn) return "Registre a entrada da jornada antes da saída.";
+      if (st.hasClockOut) return "A saída da jornada já foi registrada hoje.";
+      if (st.breakOpen) return "Encerre o intervalo antes de registrar a saída da jornada.";
+      return null;
+  }
+}
+
+export function canPunch(kind: TimeEventType, todayEvents: TimeEntry[]): boolean {
+  return blockReason(kind, todayEvents) === null;
+}
+
+/** Próximo evento primário esperado, a partir do estado do dia */
+export function nextEvent(todayEvents: TimeEntry[]): TimeEventType | null {
+  const st = dayState(todayEvents);
+  if (!st.hasClockIn) return "clock_in";
+  if (st.hasClockOut) return null; // jornada encerrada
+  if (st.breakOpen) return "break_end";
+  return "break_start";
+}
+
+/**
+ * Evento secundário (atalho). Com intervalo aberto, "Saída da jornada"
+ * continua visível mas bloqueada (ver blockReason) até o fim do intervalo.
+ */
 export function secondaryEvent(todayEvents: TimeEntry[]): TimeEventType | null {
-  if (!todayEvents.length) return null;
-  const last = todayEvents[todayEvents.length - 1].event_type;
-  if (last === "clock_in") return "clock_out";
-  if (last === "break_end") return "break_start";
-  return null;
+  const st = dayState(todayEvents);
+  if (!st.hasClockIn || st.hasClockOut) return null;
+  return "clock_out";
+}
+
+export const SEQUENCE_ERROR_PREFIX = "PONTO_SEQUENCE:";
+
+/** Traduz erro do trigger ponto_fn_check_sequence em mensagem para o usuário */
+export function sequenceErrorMessage(message: string): string | null {
+  const i = message.indexOf(SEQUENCE_ERROR_PREFIX);
+  if (i < 0) return null;
+  const rest = message.slice(i + SEQUENCE_ERROR_PREFIX.length);
+  const code = rest.split(":")[0];
+  const map: Record<string, string> = {
+    GEO_REQUIRED: "Não foi possível obter sua localização. Ative o GPS/permissão e tente de novo.",
+    CLOCK_IN_EXISTS: "A entrada da jornada já foi registrada hoje.",
+    CLOCK_OUT_EXISTS: "A saída da jornada já foi registrada hoje.",
+    NO_CLOCK_IN: "Registre a entrada da jornada primeiro.",
+    SHIFT_CLOSED: "A jornada de hoje já foi encerrada.",
+    BREAK_OPEN: "Encerre o intervalo em aberto antes de continuar.",
+    NO_OPEN_BREAK: "Não há intervalo em aberto.",
+  };
+  return map[code] ?? rest.split(":").slice(1).join(":").trim();
+}
+
+export function hasCoords(
+  e: TimeEntry
+): e is TimeEntry & { latitude: number; longitude: number } {
+  return typeof e.latitude === "number" && typeof e.longitude === "number";
 }
 
 /** Minutos trabalhados a partir da sequência de eventos de um dia */

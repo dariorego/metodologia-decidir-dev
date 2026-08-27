@@ -6,13 +6,16 @@ import {
   downloadCSV,
   fmtMin,
   groupByDay,
+  hasCoords,
   localDate,
+  localDateBR,
   localTime,
   workedMinutes,
   type Justification,
   type TimeEntry,
 } from "@/lib/domain";
 import { Badge, Pill, StatCard } from "@/components/ui";
+import { PunchMapModal } from "@/components/punch-map";
 
 type DayRow = {
   date: string;
@@ -22,6 +25,8 @@ type DayRow = {
   total: string;
   status: string;
   tone: "ok" | "warn" | "muted";
+  events: TimeEntry[];
+  geoCount: number;
 };
 
 export function RegistrosClient({
@@ -35,6 +40,7 @@ export function RegistrosClient({
   const thisMonth = localDate(now).slice(0, 7);
   const prevMonth = localDate(new Date(now.getFullYear(), now.getMonth() - 1, 15)).slice(0, 7);
   const [filter, setFilter] = useState<string>(thisMonth);
+  const [mapDay, setMapDay] = useState<DayRow | null>(null);
 
   const pendingCount = justifications.filter((j) => j.status === "pending").length;
 
@@ -88,6 +94,8 @@ export function RegistrosClient({
         total: hasOut || isToday ? fmtMin(worked) : "—",
         status,
         tone,
+        events: evs,
+        geoCount: evs.filter(hasCoords).length,
       });
     }
     return { rows, monthWorked, shifts, manualCount };
@@ -184,8 +192,17 @@ export function RegistrosClient({
                 <span className="text-[11.5px] text-stone-400">{r.sector}</span>
               </div>
               <div className="text-[13.5px] tabular-nums">{r.total}</div>
-              <div>
+              <div className="flex flex-col items-start gap-1">
                 <Badge tone={r.tone}>{r.status}</Badge>
+                {r.geoCount > 0 && (
+                  <button
+                    onClick={() => setMapDay(r)}
+                    title="Ver localização das batidas no mapa"
+                    className="cursor-pointer rounded-md px-1 py-0.5 text-[11.5px] font-medium text-teal-700 hover:bg-teal-50"
+                  >
+                    📍 mapa ({r.geoCount})
+                  </button>
+                )}
               </div>
             </div>
           ))}
@@ -228,6 +245,14 @@ export function RegistrosClient({
           </div>
         )}
       </div>
+
+      {mapDay && (
+        <PunchMapModal
+          title={`Batidas de ${localDateBR(`${mapDay.date}T12:00:00-03:00`)}`}
+          entries={mapDay.events}
+          onClose={() => setMapDay(null)}
+        />
+      )}
     </main>
   );
 }

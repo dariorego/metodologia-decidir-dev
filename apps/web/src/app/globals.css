@@ -52,3 +52,17 @@ body {
 .animate-fade-in {
   animation: fade-in 0.16s ease;
 }
+
+/* Rótulo numérico dos marcadores do mapa de batidas (Leaflet) */
+.punch-map-label {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  color: #fff;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 0;
+}
+.punch-map-label::before {
+  display: none;
+}

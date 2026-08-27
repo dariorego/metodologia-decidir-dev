@@ -7,9 +7,11 @@ import {
   REASONS,
   localDateBR,
   localTime,
+  sequenceErrorMessage,
   type Resident,
   type TimeEntry,
 } from "@/lib/domain";
+import { GEO_MESSAGE, getCoords } from "@/lib/geo";
 import { Pill, btnGhost } from "@/components/ui";
 
 const MIN_CHARS = 20;
@@ -40,6 +42,14 @@ export function JustificarClient({
     setBusy(true);
     setError(null);
 
+    // A nova entrada exige geolocalização: obtém antes de gravar qualquer coisa.
+    const geo = await getCoords();
+    if (!geo.ok) {
+      setError(GEO_MESSAGE[geo.reason]);
+      setBusy(false);
+      return;
+    }
+
     const { data: just, error: jError } = await supabase
       .from("ponto_justifications")
       .insert({
@@ -64,13 +74,18 @@ export function JustificarClient({
       event_type: "clock_in",
       sector_id: resident.default_sector_id ?? openShift.sector_id,
       origin: "automatic",
+      latitude: geo.coords.latitude,
+      longitude: geo.coords.longitude,
       justification_id: just.id,
-      device_info: { user_agent: navigator.userAgent },
+      device_info: {
+        user_agent: navigator.userAgent,
+        geo_accuracy_m: geo.coords.accuracy ?? null,
+      },
       created_by: userId,
     });
 
     if (pError) {
-      setError(pError.message);
+      setError(sequenceErrorMessage(pError.message) ?? pError.message);
       setBusy(false);
       return;
     }

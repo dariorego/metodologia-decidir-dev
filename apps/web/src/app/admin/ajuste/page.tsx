@@ -8,6 +8,7 @@ import {
   TZ,
   localDate,
   localTime,
+  sequenceErrorMessage,
   toRecifeISO,
   type Resident,
   type Sector,
@@ -142,7 +143,9 @@ export default function AjustePage() {
 
     if (eError || !entry) {
       setBusy(false);
-      setToast(`Erro: ${eError?.message ?? "ponto"}`);
+      setToast(
+        `Erro: ${eError ? (sequenceErrorMessage(eError.message) ?? eError.message) : "ponto"}`
+      );
       setTimeout(() => setToast(null), 3200);
       return;
     }

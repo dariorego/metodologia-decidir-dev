@@ -9,14 +9,18 @@ import {
   EVENT_LABEL,
   OPEN_SHIFT_ERROR,
   TZ,
+  blockReason,
   breakMinutes,
+  dayState,
   findOpenShift,
   fmtMin,
+  hasCoords,
   localDate,
   localDateBR,
   localTime,
   nextEvent,
   secondaryEvent,
+  sequenceErrorMessage,
   workedMinutes,
   type Resident,
   type Sector,
@@ -24,24 +28,8 @@ import {
   type TimeEventType,
 } from "@/lib/domain";
 import { Toast } from "@/components/ui";
-
-async function getCoords(): Promise<GeolocationCoordinates | null> {
-  if (typeof navigator === "undefined" || !navigator.geolocation) return null;
-  return new Promise((resolve) => {
-    const t = setTimeout(() => resolve(null), 3000);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        clearTimeout(t);
-        resolve(pos.coords);
-      },
-      () => {
-        clearTimeout(t);
-        resolve(null);
-      },
-      { maximumAge: 60000, timeout: 2500 }
-    );
-  });
-}
+import { PunchMapModal } from "@/components/punch-map";
+import { GEO_MESSAGE, getCoords } from "@/lib/geo";
 
 export function PontoClient({
   resident,
@@ -62,11 +50,13 @@ export function PontoClient({
   );
   const [sheet, setSheet] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState<"geo" | "save" | null>(null);
+  const [mapEntries, setMapEntries] = useState<TimeEntry[] | null>(null);
+  const [mapTitle, setMapTitle] = useState("");
 
-  const flash = useCallback((msg: string) => {
+  const flash = useCallback((msg: string, ms = 2600) => {
     setToast(msg);
-    setTimeout(() => setToast(null), 2600);
+    setTimeout(() => setToast(null), ms);
   }, []);
 
   const load = useCallback(async () => {
@@ -100,13 +90,20 @@ export function PontoClient({
   const today = localDate(new Date());
   const todayEvents = entries.filter((e) => localDate(e.event_datetime) === today);
   const openShift = findOpenShift(entries, justifiedIds);
+  const state = dayState(todayEvents);
   const primary = nextEvent(todayEvents);
   const secondary = secondaryEvent(todayEvents);
+  const secondaryBlock = secondary ? blockReason(secondary, todayEvents) : null;
   const sector = sectors.find((s) => s.id === sectorId);
-  const lastEvent = todayEvents[todayEvents.length - 1];
-  const sectorLocked = !!lastEvent && lastEvent.event_type !== "clock_out";
+  const sectorLocked = state.hasClockIn && !state.hasClockOut;
   const worked = now ? workedMinutes(todayEvents, now) : 0;
-  const breaks = todayEvents.filter((e) => e.event_type === "break_start").length;
+  const breaks = state.breakCount;
+  const todayWithCoords = todayEvents.filter(hasCoords);
+
+  function openMap(list: TimeEntry[], title: string) {
+    setMapTitle(title);
+    setMapEntries(list);
+  }
 
   async function punch(kind: TimeEventType) {
     if (busy || !sectorId) return;
@@ -114,25 +111,43 @@ export function PontoClient({
       router.push("/justificar");
       return;
     }
-    setBusy(true);
-    const coords = await getCoords();
+    const reason = blockReason(kind, todayEvents);
+    if (reason) {
+      flash(reason, 3200);
+      return;
+    }
+
+    setBusy("geo");
+    const geo = await getCoords();
+    if (!geo.ok) {
+      setBusy(null);
+      flash(GEO_MESSAGE[geo.reason], 4000);
+      return;
+    }
+
+    setBusy("save");
     const { error } = await supabase.from("ponto_time_entries").insert({
       resident_id: resident.id,
       event_type: kind,
       sector_id: sectorId,
       origin: "automatic",
-      latitude: coords?.latitude ?? null,
-      longitude: coords?.longitude ?? null,
-      device_info: { user_agent: navigator.userAgent },
+      latitude: geo.coords.latitude,
+      longitude: geo.coords.longitude,
+      device_info: {
+        user_agent: navigator.userAgent,
+        geo_accuracy_m: geo.coords.accuracy ?? null,
+      },
       created_by: userId,
     });
-    setBusy(false);
+    setBusy(null);
     if (error) {
       if (error.message.includes(OPEN_SHIFT_ERROR)) {
         router.push("/justificar");
         return;
       }
-      flash(`Erro ao registrar: ${error.message}`);
+      const friendly = sequenceErrorMessage(error.message);
+      flash(friendly ?? `Erro ao registrar: ${error.message}`, 4000);
+      load();
       return;
     }
     flash(`${EVENT_LABEL[kind]} registrado às ${localTime(new Date())}`);
@@ -151,6 +166,16 @@ export function PontoClient({
   const clock = now
     ? now.toLocaleTimeString("pt-BR", { timeZone: TZ })
     : "--:--:--";
+
+  const primaryHint = (() => {
+    if (!primary) return "";
+    if (primary === "clock_in")
+      return openShift ? "requer justificativa" : "abre a jornada de hoje";
+    if (primary === "break_end") return "encerra o intervalo em aberto";
+    if (primary === "break_start")
+      return breaks === 0 ? "toque para registrar" : `${breaks}º intervalo encerrado`;
+    return "toque para registrar";
+  })();
 
   return (
     <main className="flex flex-1 justify-center px-6 pt-6 pb-16">
@@ -206,19 +231,17 @@ export function PontoClient({
             {primary ? (
               <button
                 onClick={() => punch(primary)}
-                disabled={busy}
+                disabled={!!busy}
                 className="flex h-[216px] w-[216px] cursor-pointer flex-col items-center justify-center gap-1.5 rounded-full bg-teal-700 text-white shadow-[0_10px_30px_rgba(15,118,110,0.28)] transition-transform hover:bg-teal-800 active:scale-[0.98] disabled:opacity-70"
               >
                 <span className="max-w-[150px] text-[23px] leading-tight font-semibold tracking-tight">
-                  {busy ? "Registrando…" : EVENT_ACTION[primary]}
+                  {busy === "geo"
+                    ? "Obtendo localização…"
+                    : busy === "save"
+                      ? "Registrando…"
+                      : EVENT_ACTION[primary]}
                 </span>
-                <span className="text-[12.5px] text-teal-200">
-                  {primary === "clock_in"
-                    ? openShift
-                      ? "requer justificativa"
-                      : "abre a jornada de hoje"
-                    : "toque para registrar"}
-                </span>
+                <span className="text-[12.5px] text-teal-200">{primaryHint}</span>
               </button>
             ) : (
               <div className="flex h-[216px] w-[216px] flex-col items-center justify-center gap-1.5 rounded-full border border-dashed border-stone-300 bg-stone-50 text-center">
@@ -234,18 +257,28 @@ export function PontoClient({
             )}
 
             {secondary && (
-              <button
-                onClick={() => punch(secondary)}
-                disabled={busy}
-                className="cursor-pointer rounded-[10px] border border-stone-300 bg-white px-4.5 py-2.5 text-[13.5px] font-medium text-stone-700 transition-colors hover:border-teal-700 hover:text-teal-700"
-              >
-                {EVENT_ACTION[secondary]}
-              </button>
+              <div className="flex flex-col items-center gap-1.5">
+                <button
+                  onClick={() => punch(secondary)}
+                  disabled={!!busy || !!secondaryBlock}
+                  title={secondaryBlock ?? undefined}
+                  aria-disabled={!!secondaryBlock}
+                  className="cursor-pointer rounded-[10px] border border-stone-300 bg-white px-4.5 py-2.5 text-[13.5px] font-medium text-stone-700 transition-colors hover:border-teal-700 hover:text-teal-700 disabled:cursor-not-allowed disabled:border-stone-200 disabled:bg-stone-50 disabled:text-stone-400 disabled:hover:border-stone-200 disabled:hover:text-stone-400"
+                >
+                  {secondaryBlock ? "🔒 " : ""}
+                  {EVENT_ACTION[secondary]}
+                </button>
+                {secondaryBlock && (
+                  <span className="max-w-[300px] text-center text-[12px] leading-snug text-amber-800">
+                    {secondaryBlock}
+                  </span>
+                )}
+              </div>
             )}
 
             <p className="max-w-[340px] text-center text-xs leading-relaxed text-stone-400">
-              Registro confirmado em menos de 2s. Local e dispositivo ficam na
-              trilha de auditoria.
+              Cada batida grava sua localização (latitude/longitude), setor e
+              dispositivo na trilha de auditoria.
             </p>
           </div>
         </div>
@@ -271,10 +304,33 @@ export function PontoClient({
                 <div className="h-[9px] w-[9px] rounded-full bg-teal-700" />
                 <div className="min-h-[26px] w-px flex-1 bg-stone-200" />
               </div>
-              <div className="flex flex-col gap-0.5 pb-3">
-                <span className="text-[13.5px] font-medium">
-                  {EVENT_LABEL[ev.event_type]}
-                </span>
+              <div className="flex min-w-0 flex-1 flex-col gap-0.5 pb-3">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[13.5px] font-medium">
+                    {EVENT_LABEL[ev.event_type]}
+                  </span>
+                  {hasCoords(ev) ? (
+                    <button
+                      onClick={() =>
+                        openMap(
+                          [ev],
+                          `${EVENT_LABEL[ev.event_type]} · ${localTime(ev.event_datetime)}`
+                        )
+                      }
+                      title="Ver localização no mapa"
+                      className="flex-none cursor-pointer rounded-md px-1.5 py-0.5 text-[11.5px] font-medium text-teal-700 hover:bg-teal-50"
+                    >
+                      📍 mapa
+                    </button>
+                  ) : (
+                    <span
+                      title="Batida sem localização"
+                      className="flex-none text-[11px] text-stone-300"
+                    >
+                      sem GPS
+                    </span>
+                  )}
+                </div>
                 <span className="text-xs text-stone-400">
                   {localTime(ev.event_datetime)} ·{" "}
                   {ev.ponto_sectors?.name ?? ""} ·{" "}
@@ -296,13 +352,22 @@ export function PontoClient({
             </div>
           )}
 
+          {todayWithCoords.length > 0 && (
+            <button
+              onClick={() => openMap(todayEvents, `Batidas de hoje · ${localDateBR(new Date())}`)}
+              className="cursor-pointer rounded-[9px] border border-teal-200 bg-teal-50 py-2 text-center text-[13px] font-medium text-teal-700 transition-colors hover:bg-teal-100"
+            >
+              Ver todas no mapa ({todayWithCoords.length})
+            </button>
+          )}
+
           <div className="mt-1 flex flex-col gap-2 border-t border-stone-100 pt-3.5">
             <div className="flex justify-between text-[12.5px] text-stone-500">
               <span>Intervalos</span>
               <span>
                 {breaks === 0
                   ? "nenhum"
-                  : `${breaks} ${breaks === 1 ? "intervalo" : "intervalos"} · ${fmtMin(now ? breakMinutes(todayEvents, now) : 0)}`}
+                  : `${breaks} ${breaks === 1 ? "intervalo" : "intervalos"} · ${fmtMin(now ? breakMinutes(todayEvents, now) : 0)}${state.breakOpen ? " · em aberto" : ""}`}
               </span>
             </div>
             <div className="flex justify-between text-[12.5px] text-stone-500">
@@ -379,6 +444,14 @@ export function PontoClient({
             </button>
           </div>
         </div>
+      )}
+
+      {mapEntries && (
+        <PunchMapModal
+          title={mapTitle}
+          entries={mapEntries}
+          onClose={() => setMapEntries(null)}
+        />
       )}
 
       <Toast message={toast} />

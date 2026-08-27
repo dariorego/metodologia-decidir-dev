@@ -125,6 +125,10 @@ async function main() {
           event_datetime: recife(d.off, hhmm),
           sector_id: r.sector,
           origin: "automatic",
+          // Batidas automáticas exigem geolocalização (trigger ponto_fn_check_sequence).
+          // Coordenadas do IMIP (Recife) com pequena variação por batida.
+          latitude: -8.0578 + (Math.random() - 0.5) * 0.001,
+          longitude: -34.8961 + (Math.random() - 0.5) * 0.001,
           created_by: r.profileId,
         });
       }
